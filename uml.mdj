@@ -7968,7 +7968,7 @@
 					"_parent": {
 						"$ref": "AAAAAAGWuVzJXlQRoAg="
 					},
-					"name": "Class Diagram – Scriptoria (Concettuale)",
+					"name": "Domain model",
 					"ownedViews": [
 						{
 							"_type": "UMLClassView",
@@ -16046,7 +16046,7 @@
 					"_parent": {
 						"$ref": "AAAAAAGWyLwx3oNcsi8="
 					},
-					"name": "Class Diagram - Scriptoria (Implementativo)",
+					"name": "Business logic",
 					"ownedViews": [
 						{
 							"_type": "UMLClassView",
@@ -28990,7 +28990,7 @@
 									"parentStyle": false,
 									"left": 2016,
 									"top": 760,
-									"width": 12.65087890625,
+									"width": 13.83154296875,
 									"height": 13,
 									"alpha": -0.5235987755982988,
 									"distance": 30,
