@@ -1,6 +1,7 @@
 package DomainModel;
 
 public class Document {
+    private int id;
     private String title;
     private String description;
     private DocumentStatus status;

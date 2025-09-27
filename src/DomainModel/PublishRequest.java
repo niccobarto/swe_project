@@ -3,12 +3,14 @@ package DomainModel;
 import java.util.Date;
 
 public class PublishRequest {
+    private int id;
     private RequestStatus status;
     private String motivation;
     private Date date;
     private Document document;
 
-    public PublishRequest(String motivation, Date date, Document document) {
+    public PublishRequest(int id,String motivation, Date date, Document document) {
+        this.id=id;
         this.status = RequestStatus.PENDING;
         this.motivation = motivation;
         this.date = date;

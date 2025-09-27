@@ -3,6 +3,7 @@ package DomainModel;
 import java.util.List;
 
 public class Collection {
+    private int id;
     private String name;
     private String description;
     private User author;
