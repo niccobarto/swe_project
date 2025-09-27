@@ -1,5 +1,5 @@
 package ORM;
 
-public class PublishRequestDAO {
+public class PublishRequestDAO extends BaseDAO {
 
 }

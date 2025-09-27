@@ -1,4 +1,4 @@
 package ORM;
 
-public class CollectionDAO {
+public class CollectionDAO extends BaseDAO {
 }

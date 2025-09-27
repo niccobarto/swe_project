@@ -1,4 +1,4 @@
 package ORM;
 
-public class CommentDAO {
+public class CommentDAO extends BaseDAO {
 }

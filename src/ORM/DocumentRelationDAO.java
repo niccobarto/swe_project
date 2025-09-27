@@ -1,4 +1,4 @@
 package ORM;
 
-public class DocumentRelationDAO {
+public class DocumentRelationDAO extends BaseDAO {
 }

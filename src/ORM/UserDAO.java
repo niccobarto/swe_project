@@ -1,4 +1,6 @@
 package ORM;
 
-public class UserDAO {
+
+public class UserDAO extends BaseDAO {
+
 }

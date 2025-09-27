@@ -1,4 +1,14 @@
 package ORM;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-public interface BaseDAO {
+public abstract class BaseDAO {
+    protected Connection connection;
+    protected Connection getConnection() throws SQLException{
+        return connection = DBConnection.getInstance().getConnection();
+    }
+    protected Connection closeConnection() throws SQLException{
+        connection.close();
+        return null;
+    }
 }
