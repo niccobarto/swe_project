@@ -1,15 +1,31 @@
 package ORM;
 
 
+import DomainModel.DocumentStatus;
 import DomainModel.User;
 
+import java.sql.PreparedStatement;
 import java.util.List;
 
 public class UserDAO extends BaseDAO {
+
     public UserDAO() {
+        super();
     }
 
-    public void addUser(int userId, String name, String surname, String email, String password, boolean isModerator) {
+    public void addUser(String name, String surname, String email, String password, boolean isModerator) {
+        try{
+            String query = "INSERT INTO user (name,surname,email,password,is_moderator) VALUES(?,?,?,?,?)";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, name);
+            statement.setString(2, surname);
+            statement.setString(3, email);
+            statement.setString(4,password);
+            statement.setBoolean(5,isModerator);
+
+            statement.execute();
+            System.out.println("User added successfully");
+        }catch(Exception e){}
     }
 
     public void removeUser(int userId) {
