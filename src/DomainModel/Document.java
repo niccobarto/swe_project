@@ -56,4 +56,6 @@ public class Document {
         this.author = author;
     }
 
+    public int getId() { return id; }
+
 }

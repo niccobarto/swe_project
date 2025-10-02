@@ -46,5 +46,7 @@ public class Collection {
 
     public void setAuthor(User author) {
         this.author = author;
-    }
+}
+
+    public int getId() { return id; }
 }
