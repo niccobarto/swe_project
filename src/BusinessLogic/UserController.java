@@ -39,8 +39,7 @@ public class UserController {
 
         DocumentDAO documentDAO = new DocumentDAO();
         try{
-            documentDAO.addDocument(currentUser, description, documentPeriod, format,
-            filePath, fileName, instrument, tonality, compositor, documentType);
+            documentDAO.addDocument(currentUser, description, documentPeriod, format, filePath, fileName, documentType);
         }catch (Exception e){
             System.err.println(e.getMessage());
         }

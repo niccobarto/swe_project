@@ -21,11 +21,10 @@ public class DocumentDAO extends BaseDAO {
                             DocumentFormat documentFormat,
                             String filePath,
                             String fileName,
-                            String instrument,
                             String documentType){
 
         try{
-            String query = "INSERT INTO document (file_name,description,status,period,file_format,filepath,author_id,instrument,document_type,creation_date) VALUES(?,?,?,?,?,?,?,?,?,?)";
+            String query = "INSERT INTO document (file_name,description,status,period,file_format,filepath,author_id,creation_date) VALUES(?,?,?,?,?,?,?,?,?)";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, fileName);
             statement.setString(2, description);
@@ -34,9 +33,7 @@ public class DocumentDAO extends BaseDAO {
             statement.setString(5,documentFormat.toString());
             statement.setString(6,"file_db_path");
             statement.setInt(7,author.getId());
-            setNullable(statement, 8, instrument);
-            statement.setString(9, documentType);
-            statement.setDate(10, java.sql.Date.valueOf(java.time.LocalDate.now()));
+            statement.setDate(8, java.sql.Date.valueOf(java.time.LocalDate.now()));
             statement.execute();
             statement.close();
         }catch(SQLException e){
