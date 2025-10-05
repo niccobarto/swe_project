@@ -7,15 +7,23 @@ public class Document {
     private DocumentStatus status;
     private DocumentFormat format;
     private User author;
+    private String period;
 
-    public Document(String title,String description,DocumentFormat format,User author){
+    public Document(int id,String title,String description,DocumentFormat format,User author,String period){
+        this.id = id;
         this.title=title;
         this.description=description;
         this.status=DocumentStatus.DRAFT;
         this.format=format;
         this.author=author;
+        this.period=period;
     }
-
+    public int getId() {
+        return id;
+    }
+    public void setId(int id) {
+        this.id = id;
+    }
     public DocumentStatus getStatus() {
         return status;
     }
@@ -54,6 +62,13 @@ public class Document {
 
     public void setAuthor(User author) {
         this.author = author;
+    }
+
+    public String getPeriod() {
+        return period;
+    }
+    public void setPeriod(String period) {
+        this.period = period;
     }
 
 }

@@ -22,12 +22,10 @@ public class DocumentDAO extends BaseDAO {
                             String filePath,
                             String fileName,
                             String instrument,
-                            String tonality,
-                            String compositor,
                             String documentType){
 
         try{
-            String query = "INSERT INTO document (file_name,description,status,period,file_format,filepath,author_id,instrument,tonality,compositor,document_type,creation_date) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
+            String query = "INSERT INTO document (file_name,description,status,period,file_format,filepath,author_id,instrument,document_type,creation_date) VALUES(?,?,?,?,?,?,?,?,?,?)";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, fileName);
             statement.setString(2, description);
@@ -37,13 +35,11 @@ public class DocumentDAO extends BaseDAO {
             statement.setString(6,"file_db_path");
             statement.setInt(7,author.getId());
             setNullable(statement, 8, instrument);
-            setNullable(statement, 9, tonality);
-            setNullable(statement, 10, compositor);
-            statement.setString(11, documentType);
-            statement.setDate(12, java.sql.Date.valueOf(java.time.LocalDate.now()));
+            statement.setString(9, documentType);
+            statement.setDate(10, java.sql.Date.valueOf(java.time.LocalDate.now()));
             statement.execute();
             statement.close();
-        }catch(Exception e){
+        }catch(SQLException e){
             // loggare eccezione se necessario
         }
     }
@@ -89,6 +85,12 @@ public class DocumentDAO extends BaseDAO {
             st5.setInt(1, documentId);
             st5.executeUpdate();
             st5.close();
+
+            String q6= "DELETE FROM DocumentCollection WHERE document_id = ?";
+            PreparedStatement st6 = connection.prepareStatement(q6);
+            st6.setInt(1, documentId);
+            st6.executeUpdate();
+            st6.close();
 
             // infine rimuovi il documento
             String qDel = "DELETE FROM document WHERE document_id=?";
@@ -176,32 +178,26 @@ public class DocumentDAO extends BaseDAO {
             stmt.setInt(1, documentId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                String document_type=rs.getString("document_type");
-                switch (document_type) {
-                    case "SCORE":
-                        
-                        document=new Score();
-                        break;
-                    case "INSTRUMENTALPART":
-                        document=new InstrumentalPart();
-                        break;
-                    default:
-                        document=new Document()
-                        break;
-                }
-                // mappare ResultSet in oggetto Document
-                String title = rs.getString("file_name");
+                int id = rs.getInt("id");
+                String title = rs.getString("title");
                 String description = rs.getString("description");
                 DocumentStatus status = DocumentStatus.valueOf(rs.getString("status"));
-                DocumentFormat format = DocumentFormat.valueOf(rs.getString("file_format"));
+                String period = rs.getString("period");
+                String fileFormat = rs.getString("file_format");
                 int authorId = rs.getInt("author_id");
-                UserDAO userDAO = new UserDAO();
-                User author = userDAO.getUserById(authorId);
-                document = new Document(title, description, format, author);
+                String instrument = rs.getString("instrument");
+                String tonalita = rs.getString("tonalita");
+                String compositore = rs.getString("compositore");
+                //Todo to eliminate String text = rs.getString("text");
+                String documentType = rs.getString("document_type");
+                String filePath = rs.getString("file_path");
+                String fileName = rs.getString("file_name");
+                Date creationDate = rs.getDate("creation_date");
+                document=new Document(id,title,description,DocumentFormat.valueOf(fileFormat),new UserDAO().getUserById(authorId),period);
+                DocumentFormat format = DocumentFormat.valueOf(rs.getString("file_format"));
                 document.setStatus(status);
-                // impostare altri campi se necessario
+                //Todo Mancano filePath,fileName,creationDate da inserire
             }
-
         }catch (SQLException e){
         }
         return document;
@@ -214,7 +210,7 @@ public class DocumentDAO extends BaseDAO {
             PreparedStatement stmt = connection.prepareStatement(query);
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
-            // TODO: mappare ResultSet in oggetti Document e aggiungerli a `documents`
+            documents.add(getDocumentById(rs.getInt("document_id")));
             while(rs.next()){
                 Document doc=getDocumentById(rs.getInt("document_id"));
             }
@@ -232,7 +228,9 @@ public class DocumentDAO extends BaseDAO {
             String query = "SELECT * FROM document ORDER BY creation_date DESC";
             PreparedStatement stmt = connection.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
-            // TODO: mappare ResultSet in oggetti Document e aggiungerli a `documents`
+            while(rs.next()){
+                documents.add(getDocumentById(rs.getInt("document_id")));
+            }
             rs.close();
             stmt.close();
         } catch (SQLException e) {
