@@ -109,11 +109,11 @@ public class DocumentDAO extends BaseDAO {
         try{
             // inserisce il tag nella tabella tag (colonne esplicite)
             String query = "INSERT INTO tag (tag_label, description) VALUES(?,?)";
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, t.getLabel());
-            statement.setString(2, t.getDescription());
-            statement.execute();
-            statement.close();
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setString(1, t.getLabel());
+            ps.setString(2, t.getDescription());
+            ps.execute();
+            ps.close();
 
             // link tra documento e tag (se la tabella DocumentTags esiste)
             try {
@@ -135,15 +135,15 @@ public class DocumentDAO extends BaseDAO {
     public void removeTag(int tagId){
         try {
             String query = "DELETE FROM tag WHERE tag_id = ?";
-            PreparedStatement stmt = connection.prepareStatement(query);
-            stmt.setInt(1, tagId);
-            int affected = stmt.executeUpdate();
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setInt(1, tagId);
+            int affected = ps.executeUpdate();
             if (affected > 0) {
-                System.out.println("Tag rimosso correttamente");
+                System.out.println("Tag removed successfully");
             } else {
-                System.out.println("Tag non trovato");
+                System.out.println("Tag not found");
             }
-            stmt.close();
+            ps.close();
         } catch (SQLException e) {
             // gestire / loggare eccezione secondo necessità
         }
@@ -152,49 +152,47 @@ public class DocumentDAO extends BaseDAO {
     public void updateDocumentStatus(int docId,DocumentStatus status){
         try {
             String query = "UPDATE document SET status = ? WHERE document_id = ?";
-            PreparedStatement stmt = connection.prepareStatement(query);
-            stmt.setString(1, status.toString());
-            stmt.setInt(2, docId);
-            int affected = stmt.executeUpdate();
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setString(1, status.toString());
+            ps.setInt(2, docId);
+            int affected = ps.executeUpdate();
             if (affected > 0) {
-                System.out.println("Stato documento aggiornato");
+                System.out.println("Document updated successfully");
             } else {
-                System.out.println("Documento non trovato");
+                System.out.println("Error on document update");
             }
-            stmt.close();
+            ps.close();
         } catch (SQLException e) {
             // gestire / loggare eccezione secondo necessità
         }
     }
-
+    private Document createDocumentFromResultSet(ResultSet rs) throws SQLException {
+        int id = rs.getInt("document_id");
+        String title = rs.getString("title");
+        String description = rs.getString("description");
+        DocumentStatus status = DocumentStatus.valueOf(rs.getString("status"));
+        String fileFormat = rs.getString("file_format");
+        int authorId = rs.getInt("author_id");
+        String filePath = rs.getString("file_path");
+        String fileName = rs.getString("file_name");
+        Date creationDate = rs.getDate("creation_date");
+        User author = new UserDAO().getUserById(authorId);
+        Document document = new Document(id, title, description, DocumentFormat.valueOf(fileFormat), author, filePath, fileName, creationDate);
+        document.setStatus(status);
+        return document;
+    }
     public Document getDocumentById(int documentId){
         Document document = null;
         try {
             String query = "SELECT * FROM document WHERE document_id = ?";
-            PreparedStatement stmt = connection.prepareStatement(query);
-            stmt.setInt(1, documentId);
-            ResultSet rs = stmt.executeQuery();
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setInt(1, documentId);
+            ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                int id = rs.getInt("id");
-                String title = rs.getString("title");
-                String description = rs.getString("description");
-                DocumentStatus status = DocumentStatus.valueOf(rs.getString("status"));
-                String period = rs.getString("period");
-                String fileFormat = rs.getString("file_format");
-                int authorId = rs.getInt("author_id");
-                String instrument = rs.getString("instrument");
-                String tonalita = rs.getString("tonalita");
-                String compositore = rs.getString("compositore");
-                //Todo to eliminate String text = rs.getString("text");
-                String documentType = rs.getString("document_type");
-                String filePath = rs.getString("file_path");
-                String fileName = rs.getString("file_name");
-                Date creationDate = rs.getDate("creation_date");
-                document=new Document(id,title,description,DocumentFormat.valueOf(fileFormat),new UserDAO().getUserById(authorId),period);
-                DocumentFormat format = DocumentFormat.valueOf(rs.getString("file_format"));
-                document.setStatus(status);
-                //Todo Mancano filePath,fileName,creationDate da inserire
+                document=createDocumentFromResultSet(rs);
             }
+            rs.close();
+            ps.close();
         }catch (SQLException e){
         }
         return document;
@@ -204,15 +202,14 @@ public class DocumentDAO extends BaseDAO {
         List<Document> documents = new ArrayList<>();
         try {
             String query = "SELECT * FROM document WHERE author_id = ? ORDER BY creation_date DESC";
-            PreparedStatement stmt = connection.prepareStatement(query);
-            stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
-            documents.add(getDocumentById(rs.getInt("document_id")));
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
             while(rs.next()){
-                Document doc=getDocumentById(rs.getInt("document_id"));
+                documents.add(createDocumentFromResultSet(rs));
             }
             rs.close();
-            stmt.close();
+            ps.close();
         } catch (SQLException e) {
             // gestire / loggare eccezione secondo necessità
         }
