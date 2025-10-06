@@ -1,6 +1,7 @@
 package ORM;
 import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
 
 public abstract class BaseDAO {
     protected Connection connection;

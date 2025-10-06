@@ -21,13 +21,10 @@ public class DocumentDAO extends BaseDAO {
                             DocumentFormat documentFormat,
                             String filePath,
                             String fileName,
-                            String instrument,
-                            String tonality,
-                            String compositor,
                             String documentType){
 
         try{
-            String query = "INSERT INTO document (file_name,description,status,period,file_format,filepath,author_id,instrument,tonality,compositor,document_type,creation_date) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
+            String query = "INSERT INTO document (file_name,description,status,period,file_format,filepath,author_id,creation_date) VALUES(?,?,?,?,?,?,?,?,?)";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, fileName);
             statement.setString(2, description);
@@ -36,14 +33,10 @@ public class DocumentDAO extends BaseDAO {
             statement.setString(5,documentFormat.toString());
             statement.setString(6,"file_db_path");
             statement.setInt(7,author.getId());
-            setNullable(statement, 8, instrument);
-            setNullable(statement, 9, tonality);
-            setNullable(statement, 10, compositor);
-            statement.setString(11, documentType);
-            statement.setDate(12, java.sql.Date.valueOf(java.time.LocalDate.now()));
+            statement.setDate(8, java.sql.Date.valueOf(java.time.LocalDate.now()));
             statement.execute();
             statement.close();
-        }catch(Exception e){
+        }catch(SQLException e){
             // loggare eccezione se necessario
         }
     }
@@ -90,6 +83,12 @@ public class DocumentDAO extends BaseDAO {
             st5.executeUpdate();
             st5.close();
 
+            String q6= "DELETE FROM DocumentCollection WHERE document_id = ?";
+            PreparedStatement st6 = connection.prepareStatement(q6);
+            st6.setInt(1, documentId);
+            st6.executeUpdate();
+            st6.close();
+
             // infine rimuovi il documento
             String qDel = "DELETE FROM document WHERE document_id=?";
             PreparedStatement statement = connection.prepareStatement(qDel);
@@ -110,11 +109,11 @@ public class DocumentDAO extends BaseDAO {
         try{
             // inserisce il tag nella tabella tag (colonne esplicite)
             String query = "INSERT INTO tag (tag_label, description) VALUES(?,?)";
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, t.getLabel());
-            statement.setString(2, t.getDescription());
-            statement.execute();
-            statement.close();
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setString(1, t.getLabel());
+            ps.setString(2, t.getDescription());
+            ps.execute();
+            ps.close();
 
             // link tra documento e tag (se la tabella DocumentTags esiste)
             try {
@@ -136,15 +135,15 @@ public class DocumentDAO extends BaseDAO {
     public void removeTag(int tagId){
         try {
             String query = "DELETE FROM tag WHERE tag_id = ?";
-            PreparedStatement stmt = connection.prepareStatement(query);
-            stmt.setInt(1, tagId);
-            int affected = stmt.executeUpdate();
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setInt(1, tagId);
+            int affected = ps.executeUpdate();
             if (affected > 0) {
-                System.out.println("Tag rimosso correttamente");
+                System.out.println("Tag removed successfully");
             } else {
-                System.out.println("Tag non trovato");
+                System.out.println("Tag not found");
             }
-            stmt.close();
+            ps.close();
         } catch (SQLException e) {
             // gestire / loggare eccezione secondo necessità
         }
@@ -153,55 +152,47 @@ public class DocumentDAO extends BaseDAO {
     public void updateDocumentStatus(int docId,DocumentStatus status){
         try {
             String query = "UPDATE document SET status = ? WHERE document_id = ?";
-            PreparedStatement stmt = connection.prepareStatement(query);
-            stmt.setString(1, status.toString());
-            stmt.setInt(2, docId);
-            int affected = stmt.executeUpdate();
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setString(1, status.toString());
+            ps.setInt(2, docId);
+            int affected = ps.executeUpdate();
             if (affected > 0) {
-                System.out.println("Stato documento aggiornato");
+                System.out.println("Document updated successfully");
             } else {
-                System.out.println("Documento non trovato");
+                System.out.println("Error on document update");
             }
-            stmt.close();
+            ps.close();
         } catch (SQLException e) {
             // gestire / loggare eccezione secondo necessità
         }
     }
-
+    private Document createDocumentFromResultSet(ResultSet rs) throws SQLException {
+        int id = rs.getInt("document_id");
+        String title = rs.getString("title");
+        String description = rs.getString("description");
+        DocumentStatus status = DocumentStatus.valueOf(rs.getString("status"));
+        String fileFormat = rs.getString("file_format");
+        int authorId = rs.getInt("author_id");
+        String filePath = rs.getString("file_path");
+        String fileName = rs.getString("file_name");
+        Date creationDate = rs.getDate("creation_date");
+        User author = new UserDAO().getUserById(authorId);
+        Document document = new Document(id, title, description, DocumentFormat.valueOf(fileFormat), author, filePath, fileName, creationDate);
+        document.setStatus(status);
+        return document;
+    }
     public Document getDocumentById(int documentId){
         Document document = null;
         try {
             String query = "SELECT * FROM document WHERE document_id = ?";
-            PreparedStatement stmt = connection.prepareStatement(query);
-            stmt.setInt(1, documentId);
-            ResultSet rs = stmt.executeQuery();
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setInt(1, documentId);
+            ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                String document_type=rs.getString("document_type");
-                switch (document_type) {
-                    case "SCORE":
-                        
-                        document=new Score();
-                        break;
-                    case "INSTRUMENTALPART":
-                        document=new InstrumentalPart();
-                        break;
-                    default:
-                        document=new Document()
-                        break;
-                }
-                // mappare ResultSet in oggetto Document
-                String title = rs.getString("file_name");
-                String description = rs.getString("description");
-                DocumentStatus status = DocumentStatus.valueOf(rs.getString("status"));
-                DocumentFormat format = DocumentFormat.valueOf(rs.getString("file_format"));
-                int authorId = rs.getInt("author_id");
-                UserDAO userDAO = new UserDAO();
-                User author = userDAO.getUserById(authorId);
-                document = new Document(title, description, format, author);
-                document.setStatus(status);
-                // impostare altri campi se necessario
+                document=createDocumentFromResultSet(rs);
             }
-
+            rs.close();
+            ps.close();
         }catch (SQLException e){
         }
         return document;
@@ -211,15 +202,14 @@ public class DocumentDAO extends BaseDAO {
         List<Document> documents = new ArrayList<>();
         try {
             String query = "SELECT * FROM document WHERE author_id = ? ORDER BY creation_date DESC";
-            PreparedStatement stmt = connection.prepareStatement(query);
-            stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
-            // TODO: mappare ResultSet in oggetti Document e aggiungerli a `documents`
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
             while(rs.next()){
-                Document doc=getDocumentById(rs.getInt("document_id"));
+                documents.add(createDocumentFromResultSet(rs));
             }
             rs.close();
-            stmt.close();
+            ps.close();
         } catch (SQLException e) {
             // gestire / loggare eccezione secondo necessità
         }
@@ -232,7 +222,9 @@ public class DocumentDAO extends BaseDAO {
             String query = "SELECT * FROM document ORDER BY creation_date DESC";
             PreparedStatement stmt = connection.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
-            // TODO: mappare ResultSet in oggetti Document e aggiungerli a `documents`
+            while(rs.next()){
+                documents.add(getDocumentById(rs.getInt("document_id")));
+            }
             rs.close();
             stmt.close();
         } catch (SQLException e) {

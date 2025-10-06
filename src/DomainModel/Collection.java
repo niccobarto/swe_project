@@ -9,7 +9,8 @@ public class Collection {
     private User author;
     private List<Document> documents;
 
-    public Collection(String name, String description, User author, List<Document> documents) {
+    public Collection(int id, String name, String description, User author, List<Document> documents) {
+        this.id=id;
         this.name = name;
         this.description = description;
         this.author = author;
