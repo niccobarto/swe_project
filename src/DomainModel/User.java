@@ -9,6 +9,7 @@ public class User {
     private String email;
     private List<Document> favDocs;
     private List<Collection> favCollections;
+    private boolean moderator;
 
     public User(int id,String name, String email) {
         this.id=id;
@@ -37,6 +38,10 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public boolean isModerator() { return moderator; }
+
+    public void setModerator(boolean moderator) { this.moderator = moderator; }
 
     public List<Document> getFavDocs() {
         return favDocs;
