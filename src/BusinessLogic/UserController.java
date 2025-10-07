@@ -47,22 +47,6 @@ public class UserController {
 
     //TODO capire funzionamento assegnazioine tag per funzioni assignTag e removeTag
 
-    public void updateDocumentStatus(int docId, DocumentStatus documentStatus){
-        DocumentDAO documentDAO = new DocumentDAO();
-        try{
-            if(documentStatus== null)
-                throw new IllegalArgumentException("Document status is null");
-            Document d = documentDAO.getDocumentById(docId); //per controlli sul documento
-            if (d == null)
-                throw new IllegalArgumentException("Document not found");
-            if (d.getAuthor() == null || d.getAuthor().getId() != currentUser.getId())
-                throw new IllegalArgumentException("You are not the author of the document");
-            documentDAO.updateDocumentStatus(docId, documentStatus);
-        } catch (Exception e){
-            System.err.println(e.getMessage());
-        }
-    }
-
     public ArrayList <Document> viewOwnDocuments() {
         DocumentDAO documentDAO = new DocumentDAO();
         try{
