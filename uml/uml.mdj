@@ -42667,6 +42667,22 @@
 											"top": 641,
 											"width": 118.95361328125,
 											"height": 13
+										},
+										{
+											"_type": "ERDColumnView",
+											"_id": "AAAAAAGZysHuDSYoyK4=",
+											"_parent": {
+												"$ref": "AAAAAAGZdmHHu9rFKX0="
+											},
+											"model": {
+												"$ref": "AAAAAAGZysHt/CYlgKY="
+											},
+											"font": "Arial;13;0",
+											"parentStyle": true,
+											"left": 357,
+											"top": 656,
+											"width": 118.95361328125,
+											"height": 13
 										}
 									],
 									"font": "Arial;13;0",
@@ -42674,7 +42690,7 @@
 									"left": 352,
 									"top": 591,
 									"width": 128.95361328125,
-									"height": 68
+									"height": 83
 								}
 							],
 							"font": "Arial;13;0",
@@ -42682,7 +42698,7 @@
 							"left": 352,
 							"top": 568,
 							"width": 128.95361328125,
-							"height": 91,
+							"height": 106,
 							"nameLabel": {
 								"$ref": "AAAAAAGZdmHHu9rEjeA="
 							},
@@ -44871,7 +44887,7 @@
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"left": 764,
-									"top": 321,
+									"top": 329,
 									"height": 13,
 									"alpha": 1.5707963267948966,
 									"distance": 15,
@@ -44889,7 +44905,7 @@
 									"font": "Arial;13;0",
 									"parentStyle": false,
 									"left": 692,
-									"top": 307,
+									"top": 315,
 									"height": 13,
 									"alpha": 0.5235987755982988,
 									"distance": 30,
@@ -44925,7 +44941,7 @@
 								"$ref": "AAAAAAGZdmE3PtqnENw="
 							},
 							"lineStyle": 2,
-							"points": "667:328;779:328;779:213",
+							"points": "667:336;779:336;779:213",
 							"nameLabel": {
 								"$ref": "AAAAAAGZocBB4OgsV8w="
 							},
@@ -45318,7 +45334,7 @@
 							"_parent": {
 								"$ref": "AAAAAAGZdmEnw9qZJEU="
 							},
-							"name": "user_id",
+							"name": "id",
 							"length": 0,
 							"primaryKey": true
 						},
@@ -45649,7 +45665,7 @@
 							"_parent": {
 								"$ref": "AAAAAAGZdmE3Ptqla/8="
 							},
-							"name": "document_id",
+							"name": "id",
 							"length": 0,
 							"primaryKey": true
 						},
@@ -45849,7 +45865,7 @@
 							"_parent": {
 								"$ref": "AAAAAAGZdmFYIdqxe9M="
 							},
-							"name": "collection_id",
+							"name": "id",
 							"length": 0,
 							"primaryKey": true
 						},
@@ -45928,6 +45944,15 @@
 								"$ref": "AAAAAAGZdmHHu9rBQ70="
 							},
 							"name": "text",
+							"length": 0
+						},
+						{
+							"_type": "ERDColumn",
+							"_id": "AAAAAAGZysHt/CYlgKY=",
+							"_parent": {
+								"$ref": "AAAAAAGZdmHHu9rBQ70="
+							},
+							"name": "date",
 							"length": 0
 						}
 					]

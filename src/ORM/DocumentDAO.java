@@ -4,13 +4,15 @@ package ORM;
 import DomainModel.*;
 
 import java.sql.PreparedStatement;
-import java.time.LocalDate;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class DocumentDAO extends BaseDAO {
+    private static final Logger LOGGER = Logger.getLogger(DocumentDAO.class.getName());
     public DocumentDAO(){
         super();
     }
@@ -24,28 +26,20 @@ public class DocumentDAO extends BaseDAO {
                             String documentType){
 
         try{
-            String query = "INSERT INTO document (file_name,description,status,period,file_format,filepath,author_id,creation_date) VALUES(?,?,?,?,?,?,?,?,?)";
+            String query = "INSERT INTO document (file_name,description,status,period,file_format,file_path,author_id,creation_date) VALUES(?,?,?,?,?,?,?,?)";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, fileName);
             statement.setString(2, description);
             statement.setString(3,DocumentStatus.DRAFT.toString());
             statement.setString(4,documentPeriod);
             statement.setString(5,documentFormat.toString());
-            statement.setString(6,"file_db_path");
+            statement.setString(6,filePath);
             statement.setInt(7,author.getId());
             statement.setDate(8, java.sql.Date.valueOf(java.time.LocalDate.now()));
-            statement.execute();
+            statement.executeUpdate();
             statement.close();
         }catch(SQLException e){
-            // loggare eccezione se necessario
-        }
-    }
-
-    private void setNullable(PreparedStatement statement, int index, String value) throws SQLException {
-        if (value == null || value.isBlank()) {
-            statement.setNull(index, java.sql.Types.VARCHAR);
-        } else {
-            statement.setString(index, value);
+            LOGGER.log(Level.SEVERE, "Errore durante addDocument(authorId=" + (author!=null?author.getId():null) + ")", e);
         }
     }
 
@@ -90,7 +84,7 @@ public class DocumentDAO extends BaseDAO {
             st6.close();
 
             // infine rimuovi il documento
-            String qDel = "DELETE FROM document WHERE document_id=?";
+            String qDel = "DELETE FROM document WHERE id=?";
             PreparedStatement statement = connection.prepareStatement(qDel);
             statement.setInt(1, documentId);
             int rowsAffected = statement.executeUpdate();
@@ -101,7 +95,7 @@ public class DocumentDAO extends BaseDAO {
             }
             statement.close();
         }catch(SQLException e){
-            // gestire / loggare eccezione secondo necessità
+            LOGGER.log(Level.SEVERE, "Errore durante deleteDocument(id=" + documentId + ")", e);
         }
     }
 
@@ -112,7 +106,7 @@ public class DocumentDAO extends BaseDAO {
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setString(1, t.getLabel());
             ps.setString(2, t.getDescription());
-            ps.execute();
+            ps.executeUpdate();
             ps.close();
 
             // link tra documento e tag (se la tabella DocumentTags esiste)
@@ -121,14 +115,14 @@ public class DocumentDAO extends BaseDAO {
                 PreparedStatement linkStmt = connection.prepareStatement(linkQuery);
                 linkStmt.setInt(1, documentId);
                 linkStmt.setString(2, t.getLabel());
-                linkStmt.execute();
+                linkStmt.executeUpdate();
                 linkStmt.close();
-            } catch (SQLException ignore) {
-                // se la tabella o la colonna hanno nomi diversi, gestire altrove
+            } catch (SQLException ex) {
+                LOGGER.log(Level.WARNING, "Impossibile collegare il tag al documento (potrebbe non esistere la tabella di link)", ex);
             }
 
         }catch (SQLException e){
-            // gestire / loggare eccezione secondo necessità
+            LOGGER.log(Level.SEVERE, "Errore durante addTag(documentId=" + documentId + ")", e);
         }
     }
 
@@ -145,13 +139,13 @@ public class DocumentDAO extends BaseDAO {
             }
             ps.close();
         } catch (SQLException e) {
-            // gestire / loggare eccezione secondo necessità
+            LOGGER.log(Level.SEVERE, "Errore durante removeTag(tagId=" + tagId + ")", e);
         }
     }
 
     public void updateDocumentStatus(int docId,DocumentStatus status){
         try {
-            String query = "UPDATE document SET status = ? WHERE document_id = ?";
+            String query = "UPDATE document SET status = ? WHERE id = ?";
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setString(1, status.toString());
             ps.setInt(2, docId);
@@ -163,28 +157,31 @@ public class DocumentDAO extends BaseDAO {
             }
             ps.close();
         } catch (SQLException e) {
-            // gestire / loggare eccezione secondo necessità
+            LOGGER.log(Level.SEVERE, "Errore durante updateDocumentStatus(id=" + docId + ")", e);
         }
     }
     private Document createDocumentFromResultSet(ResultSet rs) throws SQLException {
-        int id = rs.getInt("document_id");
+        int id = rs.getInt("id");
         String title = rs.getString("title");
         String description = rs.getString("description");
-        DocumentStatus status = DocumentStatus.valueOf(rs.getString("status"));
+        String statusStr = rs.getString("status");
         String fileFormat = rs.getString("file_format");
         int authorId = rs.getInt("author_id");
         String filePath = rs.getString("file_path");
         String fileName = rs.getString("file_name");
         Date creationDate = rs.getDate("creation_date");
+
+        DocumentStatus status = statusStr != null ? DocumentStatus.valueOf(statusStr) : DocumentStatus.DRAFT;
         User author = new UserDAO().getUserById(authorId);
-        Document document = new Document(id, title, description, DocumentFormat.valueOf(fileFormat), author, filePath, fileName, creationDate);
+        Document document = new Document(id, description, DocumentFormat.valueOf(fileFormat), author, filePath, fileName, creationDate);
         document.setStatus(status);
         return document;
     }
+
     public Document getDocumentById(int documentId){
         Document document = null;
         try {
-            String query = "SELECT * FROM document WHERE document_id = ?";
+            String query = "SELECT * FROM document WHERE id = ?";
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setInt(1, documentId);
             ResultSet rs = ps.executeQuery();
@@ -194,6 +191,7 @@ public class DocumentDAO extends BaseDAO {
             rs.close();
             ps.close();
         }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante getDocumentById(id=" + documentId + ")", e);
         }
         return document;
     }
@@ -211,7 +209,7 @@ public class DocumentDAO extends BaseDAO {
             rs.close();
             ps.close();
         } catch (SQLException e) {
-            // gestire / loggare eccezione secondo necessità
+            LOGGER.log(Level.SEVERE, "Errore durante getDocumentsByAuthor(userId=" + userId + ")", e);
         }
         return documents;
     }
@@ -223,12 +221,12 @@ public class DocumentDAO extends BaseDAO {
             PreparedStatement stmt = connection.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
             while(rs.next()){
-                documents.add(getDocumentById(rs.getInt("document_id")));
+                documents.add(createDocumentFromResultSet(rs));
             }
             rs.close();
             stmt.close();
         } catch (SQLException e) {
-            // gestire / loggare eccezione secondo necessità
+            LOGGER.log(Level.SEVERE, "Errore durante getAllDocuments()", e);
         }
         return documents;
     }

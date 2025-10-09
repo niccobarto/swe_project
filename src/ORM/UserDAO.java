@@ -2,7 +2,6 @@ package ORM;
 
 
 import DomainModel.Document;
-import DomainModel.DocumentStatus;
 import DomainModel.User;
 
 import java.sql.PreparedStatement;
@@ -10,8 +9,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UserDAO extends BaseDAO {
+    private static final Logger LOGGER = Logger.getLogger(UserDAO.class.getName());
 
     public UserDAO() {
         super();
@@ -27,9 +29,12 @@ public class UserDAO extends BaseDAO {
             statement.setString(4,password);
             statement.setBoolean(5,isModerator);
 
-            statement.execute();
+            statement.executeUpdate();
+            statement.close();
             System.out.println("User added successfully");
-        }catch(Exception e){}
+        }catch(Exception e){
+            LOGGER.log(Level.SEVERE, "Errore durante addUser(email=" + email + ")", e);
+        }
     }
 
     public void removeUser(int userId) {
@@ -37,14 +42,17 @@ public class UserDAO extends BaseDAO {
             String query = "DELETE FROM user WHERE id = ?";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, userId);
-            ResultSet rs= statement.executeQuery();
-            if(rs.next()) {
+            int affected = statement.executeUpdate();
+            statement.close();
+            if(affected > 0) {
                 System.out.println("User removed successfully");
             }
             else{
                 System.out.println("User not found");
             }
-        }catch (SQLException e){}
+        }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante removeUser(id=" + userId + ")", e);
+        }
     }
 
     public User getUserById(int userId) {
@@ -60,8 +68,12 @@ public class UserDAO extends BaseDAO {
             else{
                 System.out.println("User not found");
             }
-        }catch (SQLException e){}
-    return user;
+            rs.close();
+            statement.close();
+        }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante getUserById(id=" + userId + ")", e);
+        }
+        return user;
     }
 
     public List<User> getModerators() {
@@ -70,13 +82,14 @@ public class UserDAO extends BaseDAO {
             String query = "SELECT * FROM user WHERE is_moderator = true";
             PreparedStatement statement = connection.prepareStatement(query);
             ResultSet rs= statement.executeQuery();
-            if(rs.next()) {
+            while(rs.next()) {
                 moderators.add(createUserFromResultSet(rs));
             }
-            else{
-                System.out.println("No moderators found");
-            }
-        }catch(Exception e){}
+            rs.close();
+            statement.close();
+        }catch(Exception e){
+            LOGGER.log(Level.SEVERE, "Errore durante getModerators()", e);
+        }
         return moderators;
     }
     public void addFavouriteDocuments(int userId,int documentId){
@@ -85,14 +98,17 @@ public class UserDAO extends BaseDAO {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, userId);
             statement.setInt(2, documentId);
-            ResultSet rs=statement.executeQuery();
-            if (rs.next()) {
-                System.out.println("Document added to favourites");
+            int affected = statement.executeUpdate();
+            statement.close();
+            if (affected > 0) {
+                System.out.println("Documento aggiunto ai preferiti");
             }
             else{
-                System.out.println("Error adding document to favourites");
+                System.out.println("Errore durante l'aggiunta del documento ai preferiti");
             }
-        }catch(Exception e){}
+        }catch(Exception e){
+            LOGGER.log(Level.SEVERE, "Errore durante addFavouriteDocuments(userId=" + userId + ", docId=" + documentId + ")", e);
+        }
     }
     public void removeFavouriteDocuments(int userId,int documentId){
         try{
@@ -100,14 +116,17 @@ public class UserDAO extends BaseDAO {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, userId);
             statement.setInt(2, documentId);
-            ResultSet rs=statement.executeQuery();
-            if (rs.next()) {
-                System.out.println("Document removed from favourites");
+            int affected = statement.executeUpdate();
+            statement.close();
+            if (affected > 0) {
+                System.out.println("Documento rimosso dai preferiti");
             }
             else{
-                System.out.println("Error removing document from favourites");
+                System.out.println("Errore durante la rimozione del documento dai preferiti");
             }
-        }catch(Exception e){}
+        }catch(Exception e){
+            LOGGER.log(Level.SEVERE, "Errore durante removeFavouriteDocuments(userId=" + userId + ", docId=" + documentId + ")", e);
+        }
     }
     public void addFavouriteCollection(int userId,int collectionId){
         try{
@@ -115,14 +134,17 @@ public class UserDAO extends BaseDAO {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, userId);
             statement.setInt(2, collectionId);
-            ResultSet rs=statement.executeQuery();
-            if (rs.next()) {
-                System.out.println("Collection added to favourites");
+            int affected = statement.executeUpdate();
+            statement.close();
+            if (affected > 0) {
+                System.out.println("Collezione aggiunta ai preferiti");
             }
             else{
-                System.out.println("Error adding collection to favourites");
+                System.out.println("Errore durante l'aggiunta della collezione ai preferiti");
             }
-        }catch(Exception e){}
+        }catch(Exception e){
+            LOGGER.log(Level.SEVERE, "Errore durante addFavouriteCollection(userId=" + userId + ", collectionId=" + collectionId + ")", e);
+        }
     }
     public void removeFavouriteCollection(int userId,int collectionId){
         try{
@@ -130,14 +152,17 @@ public class UserDAO extends BaseDAO {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, userId);
             statement.setInt(2, collectionId);
-            ResultSet rs=statement.executeQuery();
-            if (rs.next()) {
-                System.out.println("Collection removed from favourites");
+            int affected = statement.executeUpdate();
+            statement.close();
+            if (affected > 0) {
+                System.out.println("Collezione rimossa dai preferiti");
             }
             else{
-                System.out.println("Error removing collection from favourites");
+                System.out.println("Errore durante la rimozione della collezione dai preferiti");
             }
-        }catch(Exception e){}
+        }catch(Exception e){
+            LOGGER.log(Level.SEVERE, "Errore durante removeFavouriteCollection(userId=" + userId + ", collectionId=" + collectionId + ")", e);
+        }
     }
     public List<Document> getFavouriteDocument(int userId){
         List<Document> documents = new ArrayList<>();
@@ -146,13 +171,15 @@ public class UserDAO extends BaseDAO {
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setInt(1, userId);
             ResultSet rs=ps.executeQuery();
-            List<Document> favDocs = new ArrayList<>();
             DocumentDAO documentDAO= new DocumentDAO();
             while (rs.next()) {
                 documents.add(documentDAO.getDocumentById(rs.getInt("document_id")));
             }
-            return favDocs;
-        }catch (SQLException e){}
+            rs.close();
+            ps.close();
+        }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante getFavouriteDocument(userId=" + userId + ")", e);
+        }
         return documents;
     }
     public List<User> getAllUsers(){
@@ -164,7 +191,11 @@ public class UserDAO extends BaseDAO {
             while(rs.next()) {
                 users.add(createUserFromResultSet(rs));
             }
-        }catch (SQLException e){}
+            rs.close();
+            statement.close();
+        }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante getAllUsers()", e);
+        }
         return users;
     }
     public List<User> getUserByEmail(String email){
@@ -177,7 +208,11 @@ public class UserDAO extends BaseDAO {
             while(rs.next()) {
                 users.add(createUserFromResultSet(rs));
             }
-        }catch (SQLException e){}
+            rs.close();
+            statement.close();
+        }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante getUserByEmail(email=" + email + ")", e);
+        }
         return users;
     }
 
@@ -193,3 +228,4 @@ public class UserDAO extends BaseDAO {
         return new User(id, name, surname, email, password, isModerator);
     }
 }
+

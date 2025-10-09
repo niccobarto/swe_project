@@ -4,7 +4,6 @@ import java.util.Date;
 
 public class Document {
     private int id;
-    private String title;
     private String description;
     private DocumentStatus status;
     private DocumentFormat format;
@@ -13,9 +12,7 @@ public class Document {
     private String filePath;
     private Date creationDate;
 
-    public Document(int id,String title,String description,DocumentFormat format,User author,String filePath, String fileName, Date creationDate){
-        this.id = id;
-        this.title=title;
+    public Document(int id,String description,DocumentFormat format,User author,String filePath, String fileName,Date creationDate){
         this.description=description;
         this.status=DocumentStatus.DRAFT;
         this.format=format;
@@ -36,14 +33,6 @@ public class Document {
 
     public void setStatus(DocumentStatus status) {
         this.status = status;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public String getDescription() {
@@ -85,7 +74,6 @@ public class Document {
     public void setFilePath(String filePath) {
         this.filePath = filePath;
     }
-
     public Date getCreationDate() {
         return creationDate;
     }
@@ -93,4 +81,6 @@ public class Document {
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
     }
+
 }
+

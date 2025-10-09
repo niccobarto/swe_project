@@ -8,8 +8,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DocumentRelationDAO extends BaseDAO {
+    private static final Logger LOGGER = Logger.getLogger(DocumentRelationDAO.class.getName());
 
     public DocumentRelationDAO() {
         super();
@@ -23,7 +26,9 @@ public class DocumentRelationDAO extends BaseDAO {
             ps.setString(3,type.toString());
             ps.executeUpdate();
             ps.close();
-        }catch(SQLException e){}
+        }catch(SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante addDocumentRelation(sourceId=" + sourceId + ", destId=" + destinationId + ")", e);
+        }
     }
     public void removeDocumentRelation(int sourceId,int destinationId){
         try{
@@ -33,7 +38,9 @@ public class DocumentRelationDAO extends BaseDAO {
             ps.setInt(2,destinationId);
             ps.executeUpdate();
             ps.close();
-        }catch(SQLException e){}
+        }catch(SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante removeDocumentRelation(sourceId=" + sourceId + ", destId=" + destinationId + ")", e);
+        }
     }
     public void updateDocumentRelation(int sourceId,int destinationId,DocumentRelationType new_type){
         try{
@@ -44,7 +51,9 @@ public class DocumentRelationDAO extends BaseDAO {
             ps.setInt(3,destinationId);
             ps.executeUpdate();
             ps.close();
-        }catch(SQLException e){}
+        }catch(SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante updateDocumentRelation(sourceId=" + sourceId + ", destId=" + destinationId + ")", e);
+        }
     }
     //gives the relations about a type where the document is the source
     public List<DocumentRelation> getSourceRelationDocument(int documentId, DocumentRelationType type) {
@@ -61,6 +70,7 @@ public class DocumentRelationDAO extends BaseDAO {
             rs.close();
             ps.close();
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore durante getSourceRelationDocument(documentId=" + documentId + ", type=" + type + ")", e);
         }
         return relations;
     }
@@ -78,6 +88,7 @@ public class DocumentRelationDAO extends BaseDAO {
             rs.close();
             ps.close();
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore durante getDestinationRelationDocument(documentId=" + documentId + ", type=" + type + ")", e);
         }
         return relations;
     }
@@ -95,6 +106,7 @@ public class DocumentRelationDAO extends BaseDAO {
             rs.close();
             ps.close();
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore durante getAllSourceRelationDocument(documentId=" + documentId + ")", e);
         }
         return relations;
     }
@@ -111,6 +123,7 @@ public class DocumentRelationDAO extends BaseDAO {
             rs.close();
             ps.close();
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore durante getAllDestinationRelationDocument(documentId=" + documentId + ")", e);
         }
         return relations;
     }

@@ -1,15 +1,16 @@
 package ORM;
 import DomainModel.Comment;
-import DomainModel.Document;
-import DomainModel.User;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CommentDAO extends BaseDAO {
+    private static final Logger LOGGER = Logger.getLogger(CommentDAO.class.getName());
     public CommentDAO(){
         super();
     }
@@ -21,10 +22,10 @@ public class CommentDAO extends BaseDAO {
             statement.setInt(2, documentId);
             statement.setString(3,text);
             statement.setDate(4, java.sql.Date.valueOf(java.time.LocalDate.now()));
-            statement.execute();
+            statement.executeUpdate();
             statement.close();
         }catch(Exception e){
-            // loggare eccezione se necessario
+            LOGGER.log(Level.SEVERE, "Errore durante addComment(userId=" + commentAuthorId + ", docId=" + documentId + ")", e);
         }
     }
     public void removeComment(int commentId){
@@ -35,7 +36,7 @@ public class CommentDAO extends BaseDAO {
             statement.executeUpdate();
             statement.close();
         }catch(Exception e){
-            // loggare eccezione se necessario
+            LOGGER.log(Level.SEVERE, "Errore durante removeComment(id=" + commentId + ")", e);
         }
     }
     public List<Comment> getCommentByAuthor(int userId){
@@ -51,7 +52,9 @@ public class CommentDAO extends BaseDAO {
             rs.close();
             statement.close();
             return comments;
-        }catch (SQLException e){}
+        }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante getCommentByAuthor(userId=" + userId + ")", e);
+        }
         return comments;
     }
     public List<Comment> getCommentByDocument(int documentId){
@@ -67,7 +70,9 @@ public class CommentDAO extends BaseDAO {
             rs.close();
             statement.close();
             return comments;
-        }catch (SQLException e){}
+        }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante getCommentByDocument(docId=" + documentId + ")", e);
+        }
         return comments;
     }
 

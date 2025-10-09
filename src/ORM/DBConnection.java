@@ -3,9 +3,12 @@ package ORM;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class DBConnection {
+    private static final Logger LOGGER = Logger.getLogger(DBConnection.class.getName());
     private static DBConnection instance;
     private Connection connection;
 
@@ -15,17 +18,17 @@ public class DBConnection {
             String DB_USER="postgres";
             String DB_PASSWORD="Anotherunifithing";
 
-            this.connection=DriverManager.getConnection(DB_URL,DB_USER,DB_PASSWORD);
-            System.out.println("Connected to database!");
+            this.connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+            LOGGER.info("Connessione al database stabilita");
         }catch(SQLException e){
-            System.err.println("Error during database connection!");
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Errore durante la connessione al database", e);
+            throw e;
         }
     }
 
     public static synchronized DBConnection getInstance() throws SQLException {
         if (instance == null){
-            instance= new DBConnection();
+            instance = new DBConnection();
         }
         return instance;
     }

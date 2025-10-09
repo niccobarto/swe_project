@@ -3,7 +3,6 @@ package ORM;
 import DomainModel.Document;
 import DomainModel.PublishRequest;
 import DomainModel.RequestStatus;
-import DomainModel.User;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,8 +10,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PublishRequestDAO extends BaseDAO {
+    private static final Logger LOGGER = Logger.getLogger(PublishRequestDAO.class.getName());
 
     public PublishRequestDAO() {
         super();
@@ -25,19 +27,23 @@ public class PublishRequestDAO extends BaseDAO {
             ps.setString(2, RequestStatus.PENDING.toString());
             ps.setDate(3, java.sql.Date.valueOf(java.time.LocalDate.now()));
             ps.setInt(4,doc.getAuthor().getId());
-            ps.execute();
+            ps.executeUpdate();
             ps.close();
 
-        }catch (SQLException e){}
+        }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante addRequest(docId=" + (doc!=null?doc.getId():null) + ")", e);
+        }
     }
     public void removeRequest(int docId) {
         try{
             String query="DELETE FROM publish_request WHERE document_id=?";
             PreparedStatement ps=connection.prepareStatement(query);
             ps.setInt(1,docId);
-            ps.execute();
+            ps.executeUpdate();
             ps.close();
-        }catch (SQLException e){}
+        }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante removeRequest(docId=" + docId + ")", e);
+        }
     }
     //Todo da decidere se permettere di modificare la richiesta
     // anche ad altri moderatori.
@@ -49,16 +55,18 @@ public class PublishRequestDAO extends BaseDAO {
             PreparedStatement ps=connection.prepareStatement(query);
             ps.setInt(1,docId);
             ps.setInt(2,moderator_id);
-            ps.execute();
+            ps.executeUpdate();
             ps.close();
             String query2="UPDATE publish_request SET request_status=?,date_result=? WHERE document_id=?";
             PreparedStatement ps2=connection.prepareStatement(query2);
             ps2.setString(1,status.toString());
-            ps2.setInt(2,docId);
-            ps2.setDate(3,java.sql.Date.valueOf(java.time.LocalDate.now()));
-            ps2.execute();
+            ps2.setDate(2,java.sql.Date.valueOf(java.time.LocalDate.now()));
+            ps2.setInt(3,docId);
+            ps2.executeUpdate();
             ps2.close();
-        }catch (SQLException e){}
+        }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante updateRequestStatus(docId=" + docId + ", moderatorId=" + moderator_id + ")", e);
+        }
     }
     public List<PublishRequest> getRequestByModerator(int mdoeratorId){
         List<PublishRequest> publishRequests=new ArrayList<PublishRequest>();
@@ -70,7 +78,11 @@ public class PublishRequestDAO extends BaseDAO {
             while(rs.next()){
                 publishRequests.add(createRequestFromResultSet(rs));
             }
-        }catch (SQLException e){}
+            rs.close();
+            ps.close();
+        }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante getRequestByModerator(moderatorId=" + mdoeratorId + ")", e);
+        }
         return publishRequests;
     }
     public List<PublishRequest> getRequestsByAuthor(int userId){
@@ -83,7 +95,11 @@ public class PublishRequestDAO extends BaseDAO {
             while(rs.next()){
                 publishRequests.add(createRequestFromResultSet(rs));
             }
-        }catch (SQLException e){}
+            rs.close();
+            ps.close();
+        }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante getRequestsByAuthor(userId=" + userId + ")", e);
+        }
         return publishRequests;
     }
     public List<PublishRequest> getRequestsByStatus(RequestStatus status){
@@ -96,7 +112,11 @@ public class PublishRequestDAO extends BaseDAO {
             while(rs.next()){
                 publishRequests.add(createRequestFromResultSet(rs));
             }
-        }catch (SQLException e){}
+            rs.close();
+            ps.close();
+        }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante getRequestsByStatus(status=" + status + ")", e);
+        }
         return publishRequests;
     }
 

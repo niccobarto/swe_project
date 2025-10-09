@@ -1,16 +1,19 @@
 package ORM;
 import java.sql.Connection;
 import java.sql.*;
-import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class BaseDAO {
     protected Connection connection;
+    private static final Logger LOGGER = Logger.getLogger(BaseDAO.class.getName());
 
     protected BaseDAO() {
         try{
-            connection=DBConnection.getInstance().getConnection();
+            connection = DBConnection.getInstance().getConnection();
         }catch (SQLException e){
-            System.err.println("Error during database connection");
+            LOGGER.log(Level.SEVERE, "Errore durante l'ottenimento della connessione al database", e);
+            throw new IllegalStateException("Impossibile stabilire la connessione al database", e);
         }
     }
 
