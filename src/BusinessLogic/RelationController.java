@@ -23,6 +23,7 @@ public class RelationController {
     public ArrayList<Document> searchDestinationRelations(DocumentRelationType type){
         DocumentRelationDAO relDAO = new DocumentRelationDAO();
         try{
+            //Fixme differenti tipi di query per le relazioni
             List<DocumentRelation> all = relDAO.getRelationsFromDocument(selected.getId());
             if (all == null) all = List.of(); //lista vuota immutabile per evitare eccezione null se DAO dovesse restituire null
 
