@@ -10,4 +10,11 @@ public class DocumentRelation {
         this.destination = destination;
         this.relationType = relationType;
     }
+
+    public Document getSource() { return source; }
+
+    public Document getDestination() { return destination; }
+
+    public DocumentRelationType getRelationType() { return relationType; }
+
 }
