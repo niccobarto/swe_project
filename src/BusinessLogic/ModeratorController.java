@@ -27,7 +27,7 @@ public class ModeratorController {
             boolean hasPending = pendings.stream().anyMatch( r -> r.getDocument() != null && r.getDocument().getId() == docId);
             if (!hasPending)
                 throw new IllegalArgumentException("No pending requests found for this document");
-            publishRequestDAO.updateRequestStatus(docId, decision);
+            publishRequestDAO.updateRequestStatus(docId, currentUser.getId(), decision);
             if(decision == RequestStatus.APPROVED)
                 documentDAO.updateDocumentStatus( docId, DocumentStatus.PUBLISHED);
             if(decision == RequestStatus.REJECTED)
