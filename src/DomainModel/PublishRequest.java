@@ -6,15 +6,18 @@ public class PublishRequest {
     private int id;
     private RequestStatus status;
     private String motivation;
-    private Date date;
+    private Date dateRequest;
+    private Date dateResult;
     private Document document;
 
-    public PublishRequest(int id,String motivation, Date date, Document document) {
+    public PublishRequest(int id,String motivation, Date date_request, Date date_result, Document document) {
         this.id=id;
         this.status = RequestStatus.PENDING;
         this.motivation = motivation;
-        this.date = date;
+        this.dateRequest = date_request;
+        this.dateResult = date_result;
         this.document = document;
+
     }
 
     public String getMotivation() {
@@ -33,12 +36,12 @@ public class PublishRequest {
         this.status = status;
     }
 
-    public Date getDate() {
-        return date;
+    public Date getDateRequest() {
+        return dateRequest;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setDateRequest(Date date_request) {
+        this.dateRequest = date_request;
     }
 
     public Document getDocument() {
@@ -48,4 +51,16 @@ public class PublishRequest {
     public void setDocument(Document document) {
         this.document = document;
     }
+
+    public int getId() {
+        return id;
+     }
+    public Date getDate_result() {
+        return dateResult;
+    }
+
+    public void setDate_result(Date date_result) {
+        this.dateResult = date_result;
+    }
 }
+
