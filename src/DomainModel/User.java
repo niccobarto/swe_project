@@ -62,4 +62,7 @@ public class User {
         return isModerator;
     }
 
+    public String getPassword() {
+        return password;
+    }
 }

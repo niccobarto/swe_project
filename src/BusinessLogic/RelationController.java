@@ -23,8 +23,7 @@ public class RelationController {
     public ArrayList<Document> searchDestinationRelations(DocumentRelationType type){
         DocumentRelationDAO relDAO = new DocumentRelationDAO();
         try{
-            //Fixme differenti tipi di query per le relazioni
-            List<DocumentRelation> all = relDAO.getRelationsFromDocument(selected.getId());
+            List<DocumentRelation> all = relDAO.getAllDestinationRelationDocument(selected.getId());
             if (all == null) all = List.of(); //lista vuota immutabile per evitare eccezione null se DAO dovesse restituire null
 
             List <Document> dests= all.stream()
@@ -32,7 +31,7 @@ public class RelationController {
                     .filter(r -> type == null || r.getRelationType() == type)
                     .map(DocumentRelation::getDestination)
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .toList();
 
             return new ArrayList<>(dests);
 
@@ -46,7 +45,7 @@ public class RelationController {
     public ArrayList<Document> searchSourceRelations(DocumentRelationType type){
         DocumentRelationDAO relDAO = new DocumentRelationDAO();
         try {
-            List<DocumentRelation> all = relDAO.getRelationsFromDocument(selected.getId());
+            List<DocumentRelation> all = relDAO.getAllSourceRelationDocument(selected.getId());
             if (all == null) all = List.of();
 
             List<Document> sources = all.stream()

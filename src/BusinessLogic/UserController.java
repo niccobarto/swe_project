@@ -26,16 +26,15 @@ public class UserController {
             Document doc = documentDAO.getDocumentById(documentId);
             if (doc == null)
                 throw new IllegalArgumentException("Document not found");
-            commentDAO.addComment(text, currentUser, doc);
+            commentDAO.addComment(text, currentUser.getId(), doc.getId());
         } catch (Exception e){
             System.err.println(e.getMessage()); //segnala errore a console
         }
     }
 
     public void createDocument(String description, String documentPeriod,
-                               DocumentFormat format, String fileName,String filePath,
-                               String instrument, String tonality,
-                               String compositor, String documentType){ //TODO eliminare tutti questi attrubuti... lasciamo spazio ai tag per questi
+                               DocumentFormat format, String fileName,
+                               String filePath, String documentType){
 
         DocumentDAO documentDAO = new DocumentDAO();
         try{
