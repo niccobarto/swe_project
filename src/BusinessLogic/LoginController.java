@@ -17,24 +17,19 @@ public class LoginController {
             if (password == null || password.isBlank())
                 throw new IllegalArgumentException("Password cannot be empty");
 
-            List<User> matches = userDAO.getUserByEmail(email);
-            if (matches == null || matches.isEmpty())
+            User match = userDAO.getUserByEmail(email);
+            if (match == null)
                 throw new IllegalArgumentException("User not found");
-
-            if (matches.size() > 1) {
-                System.err.println("Warning: multiple users found with same email; taking the first");
-            }
-            User user = matches.get(0);
-            if (!Objects.equals(user.getPassword(), password))
+            if (!Objects.equals(match.getPassword(), password))
                 throw new IllegalArgumentException("Invalid credentials");
-            return user;
+            return match;
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return null;
         }
     }
 
-    public void register(String name, String surname, String email, String password, boolean isModerator) {
+    public void register(String name, String surname, String email, String password, boolean isModerator,boolean isAdmin) {
         UserDAO userDAO = new UserDAO();
         try {
             if (name == null || name.isBlank())
@@ -46,11 +41,11 @@ public class LoginController {
             if (password == null || password.isBlank())
                 throw new IllegalArgumentException("Password cannot be empty");
 
-            List<User> existing = userDAO.getUserByEmail(email);
-            if (existing != null && !existing.isEmpty())
+            User existing = userDAO.getUserByEmail(email);
+            if (existing != null)
                 throw new IllegalArgumentException("Email already in use");
 
-            userDAO.addUser(name, surname, email, password, isModerator);
+            userDAO.addUser(name, surname, email, password, isModerator,isAdmin);
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
@@ -61,8 +56,8 @@ public class LoginController {
         try {
             if (email == null || email.isBlank())
                 throw new IllegalArgumentException("Email cannot be empty");
-            List<User> existing = userDAO.getUserByEmail(email);
-            return existing == null || existing.isEmpty();
+            User existing = userDAO.getUserByEmail(email);
+            return existing == null;
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return false;

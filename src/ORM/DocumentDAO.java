@@ -230,4 +230,22 @@ public class DocumentDAO extends BaseDAO {
         }
         return documents;
     }
+
+    public List<Document> getDocumentsByStatus(DocumentStatus status){
+        List<Document> documents = new ArrayList<>();
+        try {
+            String query = "SELECT * FROM document WHERE status = ? ORDER BY creation_date DESC";
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setString(1, status.toString());
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                documents.add(createDocumentFromResultSet(rs));
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore durante getDocumentsByStatus(status=" + status + ")", e);
+        }
+        return documents;
+    }
 }

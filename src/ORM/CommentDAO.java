@@ -39,7 +39,7 @@ public class CommentDAO extends BaseDAO {
             LOGGER.log(Level.SEVERE, "Errore durante removeComment(id=" + commentId + ")", e);
         }
     }
-    public List<Comment> getCommentByAuthor(int userId){
+    public List<Comment> getCommentsByAuthor(int userId){
         List<Comment> comments = new ArrayList<>();
         try{
             String query = "SELECT * FROM comments WHERE user_id = ?";
@@ -57,7 +57,7 @@ public class CommentDAO extends BaseDAO {
         }
         return comments;
     }
-    public List<Comment> getCommentByDocument(int documentId){
+    public List<Comment> getCommentsByDocument(int documentId){
         List<Comment> comments = new ArrayList<>();
         try{
             String query = "SELECT * FROM comments WHERE document_id = ?";

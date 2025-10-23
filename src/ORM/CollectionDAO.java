@@ -115,7 +115,7 @@ public class CollectionDAO extends BaseDAO {
         }
         return documents;
     }
-    public List<Collection> getAllCollection(){
+    public List<Collection> getAllCollections(){
         List<Collection> collections=new ArrayList<>();
         try{
             String query="SELECT * FROM collection";

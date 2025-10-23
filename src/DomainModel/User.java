@@ -11,8 +11,9 @@ public class User {
     private List<Document> favDocs;
     private List<Collection> favCollections;
     private boolean isModerator;
+    private boolean isAdmin;
 
-    public User(int id,String name, String surname,String email, String password,boolean isModerator) {
+    public User(int id,String name, String surname,String email, String password,boolean isModerator,boolean isAdmin) {
         this.id=id;
         this.name = name+surname;
         this.email = email;
@@ -20,6 +21,7 @@ public class User {
         this.favDocs = new ArrayList<>();
         this.favCollections = new ArrayList<>();
         this.isModerator=isModerator;
+        this.isAdmin=isAdmin;
     }
 
     public int getId() {
@@ -64,5 +66,9 @@ public class User {
 
     public String getPassword() {
         return password;
+    }
+
+    public boolean isAdmin() {
+        return isAdmin;
     }
 }
