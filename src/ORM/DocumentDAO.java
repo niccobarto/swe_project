@@ -175,7 +175,27 @@ public class DocumentDAO extends BaseDAO {
         User author = new UserDAO().getUserById(authorId);
         Document document = new Document(id, description, DocumentFormat.valueOf(fileFormat), author, filePath, fileName, creationDate);
         document.setStatus(status);
+        document.setTags(getTagsForDocument(id));
         return document;
+    }
+
+    private List<Tag> getTagsForDocument(int documentId) {
+        List<Tag> tags = new ArrayList<>();
+        String query = "SELECT t.tag_label, t.description FROM tag t " +
+                "JOIN DocumentTags dt ON dt.tag_label = t.tag_label WHERE dt.document_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, documentId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String label = rs.getString("tag_label");
+                    String description = rs.getString("description");
+                    tags.add(new Tag(label, description));
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "Impossibile recuperare i tag per il documento " + documentId, e);
+        }
+        return tags;
     }
 
     public Document getDocumentById(int documentId){
@@ -248,4 +268,45 @@ public class DocumentDAO extends BaseDAO {
         }
         return documents;
     }
+
+    public List<Document> searchDocuments(DocumentSearchCriteria criteria){
+        List<Document> documents = new ArrayList<>();
+        try {
+            StringBuilder queryBuilder = new StringBuilder("SELECT * FROM document WHERE 1=1");
+            List<Object> parameters = new ArrayList<>();
+
+            if (criteria.getDocumentName().isPresent()) {
+                queryBuilder.append(" AND file_name LIKE ?");
+                parameters.add("%" + criteria.getDocumentName().get() + "%");
+            }
+            if (criteria.getAuthorId().isPresent()) {
+                queryBuilder.append(" AND author_id = ?");
+                parameters.add(criteria.getAuthorId().get());
+            }
+            if (criteria.getStatus().isPresent()) {
+                queryBuilder.append(" AND status = ?");
+                parameters.add(criteria.getStatus().get().toString());
+            }
+            if (criteria.getFormat().isPresent()) {
+                queryBuilder.append(" AND file_format = ?");
+                parameters.add(criteria.getFormat().get().toString());
+            }
+
+            PreparedStatement ps = connection.prepareStatement(queryBuilder.toString());
+            for (int i = 0; i < parameters.size(); i++) {
+                ps.setObject(i + 1, parameters.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                documents.add(createDocumentFromResultSet(rs));
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Errore durante searchDocuments()", e);
+        }
+        return documents;
+    }
+
 }

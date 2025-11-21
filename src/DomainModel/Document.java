@@ -1,6 +1,8 @@
 package DomainModel;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Document {
     private final int id;
@@ -11,6 +13,7 @@ public class Document {
     private String fileName;
     private String filePath;
     private Date creationDate;
+    private List<Tag> tags;
 
     public Document(int id,String description,DocumentFormat format,User author,String filePath, String fileName,Date creationDate){
         this.id=id;
@@ -21,6 +24,7 @@ public class Document {
         this.filePath = filePath;
         this.fileName = fileName;
         this.creationDate = creationDate;
+        this.tags=new ArrayList<>();
     }
     public int getId() {
         return id;
@@ -78,6 +82,14 @@ public class Document {
 
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
     }
 
 }

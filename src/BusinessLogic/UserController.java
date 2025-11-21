@@ -16,6 +16,17 @@ public class UserController {
     }
 
     //TODO: dopo aver deciso la search col prof creare il metodo searchDocuments
+    public ArrayList<Document> searchDocuments(DocumentSearchCriteria criteria) {
+        DocumentDAO documentDAO = new DocumentDAO();
+        try {
+            return new ArrayList<>(documentDAO.searchDocuments(criteria));
+        } catch (Exception e) {
+            System.err.println("searchDocuments failed for user=" + currentUser.getId());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
 
     public void writeComment(int documentId, String text) {
         CommentDAO commentDAO = new CommentDAO();
@@ -72,7 +83,22 @@ public class UserController {
             e.printStackTrace();
         }
     }
+    public void removeDocumentToCollection(int docId, int collectionId) {
+        CollectionDAO collectionDAO = new CollectionDAO();
+        try{
+            boolean ownedByCurrentUser = collectionDAO.getCollectionsByUser(currentUser.getId())
+                    .stream()
+                    .anyMatch(c -> c.getId() == collectionId);
 
+            if (!ownedByCurrentUser)
+                throw new IllegalArgumentException("You are not the author of the collection");
+
+            collectionDAO.removeDocumentFromCollection(docId, collectionId);
+        } catch (Exception e){
+            System.err.println("removeDocumentToCollection failed: docId=" + docId + ", collectionId=" + collectionId);
+            e.printStackTrace();
+        }
+    }
     public void askForPublication(int docId) {
         DocumentDAO documentDAO = new DocumentDAO();
         PublishRequestDAO publishRequestDAO = new PublishRequestDAO();
