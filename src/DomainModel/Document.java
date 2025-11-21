@@ -3,7 +3,7 @@ package DomainModel;
 import java.util.Date;
 
 public class Document {
-    private int id;
+    private final int id;
     private String description;
     private DocumentStatus status;
     private DocumentFormat format;
@@ -13,6 +13,7 @@ public class Document {
     private Date creationDate;
 
     public Document(int id,String description,DocumentFormat format,User author,String filePath, String fileName,Date creationDate){
+        this.id=id;
         this.description=description;
         this.status=DocumentStatus.DRAFT;
         this.format=format;
@@ -23,9 +24,6 @@ public class Document {
     }
     public int getId() {
         return id;
-    }
-    public void setId(int id) {
-        this.id = id;
     }
     public DocumentStatus getStatus() {
         return status;

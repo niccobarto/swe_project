@@ -3,7 +3,7 @@ package DomainModel;
 import java.util.Date;
 
 public class PublishRequest {
-    private int id;
+    private final int id;
     private RequestStatus status;
     private String motivation;
     private Date dateRequest;
