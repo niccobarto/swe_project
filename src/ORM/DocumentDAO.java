@@ -291,7 +291,20 @@ public class DocumentDAO extends BaseDAO {
                 queryBuilder.append(" AND file_format = ?");
                 parameters.add(criteria.getFormat().get().toString());
             }
-
+            if (criteria.getCreatedAfter().isPresent()) {
+                queryBuilder.append(" AND creation_date >= ?");
+                parameters.add(new java.sql.Date(criteria.getCreatedAfter().get().getTime()));
+            }
+            if (criteria.getCreatedBefore().isPresent()) {
+                queryBuilder.append(" AND creation_date <= ?");
+                parameters.add(new java.sql.Date(criteria.getCreatedBefore().get().getTime()));
+            }
+            if (criteria.getTags().isPresent()) {
+                for (String tag : criteria.getTags().get()) {
+                    queryBuilder.append(" AND EXISTS (SELECT 1 FROM DocumentTags dt WHERE dt.document_id = document.id AND dt.tag_label = ?)");
+                    parameters.add(tag);
+                }
+            }
             PreparedStatement ps = connection.prepareStatement(queryBuilder.toString());
             for (int i = 0; i < parameters.size(); i++) {
                 ps.setObject(i + 1, parameters.get(i));
