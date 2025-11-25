@@ -40,8 +40,10 @@ public class DocumentDAO extends BaseDAO {
             statement.setString(9, title);
             statement.executeUpdate();
             statement.close();
+            return true;
         }catch(SQLException e){
             LOGGER.log(Level.SEVERE, "Errore durante addDocument(authorId=" + (author!=null?author.getId():null) + ")", e);
+            return false;
         }
     }
 
@@ -183,8 +185,8 @@ public class DocumentDAO extends BaseDAO {
 
     private List<Tag> getTagsForDocument(int documentId) {
         List<Tag> tags = new ArrayList<>();
-        String query = "SELECT t.tag_label, t.description FROM tag t " +
-                "JOIN DocumentTags dt ON dt.tag_label = t.tag_label WHERE dt.document_id = ?";
+        String query = "SELECT t.label, t.description FROM tag t " +
+                "JOIN document_tags dt ON dt.tag_label = t.label WHERE dt.document_id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, documentId);
             try (ResultSet rs = stmt.executeQuery()) {
