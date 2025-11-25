@@ -4,5 +4,7 @@ public enum DocumentFormat {
     PDF,
     AUDIO,
     MIDI,
-    XML
+    MUSICXML,
+    TXT,
+    IMAGE
 }
