@@ -238,6 +238,28 @@ public class UserDAO extends BaseDAO {
             return false;
         }
     }
+
+    public boolean setModerator(int userId, boolean isModerator){
+        try{
+            String query = "UPDATE \"user\" SET is_moderator = ? WHERE id = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setBoolean(1, isModerator);
+            statement.setInt(2, userId);
+            int affected = statement.executeUpdate();
+            statement.close();
+            if (affected > 0) {
+                System.out.println("User moderator status updated successfully");
+                return true;
+            }
+            else{
+                System.out.println("User not found");
+                return false;
+            }
+        }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante setModerator(userId=" + userId + ", isModerator=" + isModerator + ")", e);
+            return false;
+        }
+    }
     //------ private methods
 
     private User createUserFromResultSet(ResultSet rs) throws SQLException {

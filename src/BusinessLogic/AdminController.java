@@ -80,6 +80,18 @@ public class AdminController {
         }
     }
 
+    public void setModerator(int userId, boolean isModerator){
+        try {
+            UserDAO userDAO = new UserDAO();
+            userDAO.setModerator(userId, isModerator);
+        } catch (Exception e) {
+            System.err.println("setModerator failed: " + e);
+        }
+    }
+
+    public void removeComment(int commentId){
+        //Todo
+    }
     public List<Document> documentsApprovedByModerator(int moderatorId){
         try{
             UserDAO userDAO = new UserDAO();
