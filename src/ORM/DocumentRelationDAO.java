@@ -19,7 +19,7 @@ public class DocumentRelationDAO extends BaseDAO {
     }
     public void addDocumentRelation(int sourceId,int destinationId,DocumentRelationType type){
         try{
-            String query="INSERT INTO DocumentRelations (source_id,destination_id,relation_type) VALUES (?,?,?)";
+            String query="INSERT INTO document_relation (source_id,destination_id,relation_type) VALUES (?,?,?)";
             PreparedStatement ps=connection.prepareStatement(query);
             ps.setInt(1,sourceId);
             ps.setInt(2,destinationId);
@@ -32,7 +32,7 @@ public class DocumentRelationDAO extends BaseDAO {
     }
     public void removeDocumentRelation(int sourceId,int destinationId){
         try{
-            String query="DELETE FROM DocumentRelations WHERE source_id=? AND destination_id=?";
+            String query="DELETE FROM document_relation WHERE source_id=? AND destination_id=?";
             PreparedStatement ps=connection.prepareStatement(query);
             ps.setInt(1,sourceId);
             ps.setInt(2,destinationId);
@@ -44,7 +44,7 @@ public class DocumentRelationDAO extends BaseDAO {
     }
     public void updateDocumentRelation(int sourceId,int destinationId,DocumentRelationType new_type){
         try{
-            String query="UPDATE DocumentRelations SET relation_type=? WHERE source_id=? AND destination_id=?";
+            String query="UPDATE document_relation SET relation_type=? WHERE source_id=? AND destination_id=?";
             PreparedStatement ps=connection.prepareStatement(query);
             ps.setString(1,new_type.toString());
             ps.setInt(2,sourceId);
@@ -59,7 +59,7 @@ public class DocumentRelationDAO extends BaseDAO {
     public List<DocumentRelation> getSourceRelationDocument(int documentId, DocumentRelationType type) {
         List<DocumentRelation> relations = new ArrayList<>();
         try {
-            String query = "SELECT * FROM DocumentRelations WHERE source_id=? AND relation_type=?";
+            String query = "SELECT * FROM document_relation WHERE source_id=? AND relation_type=?";
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setInt(1, documentId);
             ps.setString(2, type.toString());
@@ -77,7 +77,7 @@ public class DocumentRelationDAO extends BaseDAO {
     public List<DocumentRelation> getDestinationRelationDocument(int documentId, DocumentRelationType type) {
         List<DocumentRelation> relations = new ArrayList<>();
         try {
-            String query = "SELECT * FROM DocumentRelations WHERE destination_id=? AND relation_type=?";
+            String query = "SELECT * FROM document_relation WHERE destination_id=? AND relation_type=?";
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setInt(1, documentId);
             ps.setString(2, type.toString());
@@ -96,7 +96,7 @@ public class DocumentRelationDAO extends BaseDAO {
     public List<DocumentRelation> getAllSourceRelationDocument(int documentId) {
         List<DocumentRelation> relations = new ArrayList<>();
         try {
-            String query = "SELECT * FROM DocumentRelations WHERE source_id=?";
+            String query = "SELECT * FROM document_relation WHERE source_id=?";
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setInt(1, documentId);
             var rs = ps.executeQuery();
@@ -113,7 +113,7 @@ public class DocumentRelationDAO extends BaseDAO {
     public List<DocumentRelation> getAllDestinationRelationDocument(int documentId) {
         List<DocumentRelation> relations = new ArrayList<>();
         try {
-            String query = "SELECT * FROM DocumentRelations WHERE destination_id=?";
+            String query = "SELECT * FROM document_relation WHERE destination_id=?";
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setInt(1, documentId);
             var rs = ps.executeQuery();
