@@ -17,16 +17,17 @@ public class DocumentDAO extends BaseDAO {
         super();
     }
 
-    public void addDocument(User author,
+    public boolean addDocument(User author,
+                            String title,
                             String description,
                             String documentPeriod,
                             DocumentFormat documentFormat,
                             String filePath,
                             String fileName,
-                            String documentType){
+                            List<String> tags){
 
         try{
-            String query = "INSERT INTO document (file_name,description,status,period,file_format,file_path,author_id,creation_date) VALUES(?,?,?,?,?,?,?,?)";
+            String query = "INSERT INTO document (file_name,description,status,period,file_format,file_path,author_id,creation_date,title) VALUES(?,?,?,?,?,?,?,?,?)";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, fileName);
             statement.setString(2, description);
@@ -36,6 +37,7 @@ public class DocumentDAO extends BaseDAO {
             statement.setString(6,filePath);
             statement.setInt(7,author.getId());
             statement.setDate(8, java.sql.Date.valueOf(java.time.LocalDate.now()));
+            statement.setString(9, title);
             statement.executeUpdate();
             statement.close();
         }catch(SQLException e){
@@ -173,7 +175,7 @@ public class DocumentDAO extends BaseDAO {
 
         DocumentStatus status = statusStr != null ? DocumentStatus.valueOf(statusStr) : DocumentStatus.DRAFT;
         User author = new UserDAO().getUserById(authorId);
-        Document document = new Document(id, description, DocumentFormat.valueOf(fileFormat), author, filePath, fileName, creationDate);
+        Document document = new Document(id, title ,description, DocumentFormat.valueOf(fileFormat), author, filePath, fileName, creationDate);
         document.setStatus(status);
         document.setTags(getTagsForDocument(id));
         return document;
@@ -275,9 +277,9 @@ public class DocumentDAO extends BaseDAO {
             StringBuilder queryBuilder = new StringBuilder("SELECT * FROM document WHERE 1=1");
             List<Object> parameters = new ArrayList<>();
 
-            if (criteria.getDocumentName().isPresent()) {
-                queryBuilder.append(" AND file_name LIKE ?");
-                parameters.add("%" + criteria.getDocumentName().get() + "%");
+            if (criteria.getDocumentTitle().isPresent()) {
+                queryBuilder.append(" AND title LIKE ?");
+                parameters.add("%" + criteria.getDocumentTitle().get() + "%");
             }
             if (criteria.getAuthorId().isPresent()) {
                 queryBuilder.append(" AND author_id = ?");

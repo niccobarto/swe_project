@@ -6,6 +6,7 @@ import java.util.List;
 
 public class Document {
     private final int id;
+    private String title;
     private String description;
     private DocumentStatus status;
     private DocumentFormat format;
@@ -15,8 +16,9 @@ public class Document {
     private Date creationDate;
     private List<Tag> tags;
 
-    public Document(int id,String description,DocumentFormat format,User author,String filePath, String fileName,Date creationDate){
+    public Document(int id, String title,String description,DocumentFormat format,User author,String filePath, String fileName,Date creationDate){
         this.id=id;
+        this.title=title;
         this.description=description;
         this.status=DocumentStatus.DRAFT;
         this.format=format;
@@ -86,6 +88,14 @@ public class Document {
 
     public List<Tag> getTags() {
         return tags;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public void setTags(List<Tag> tags) {

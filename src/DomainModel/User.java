@@ -12,8 +12,9 @@ public class User {
     private List<Collection> favCollections;
     private boolean isModerator;
     private boolean isAdmin;
+    private int nextFileName;
 
-    public User(int id,String name, String surname,String email, String password,boolean isModerator,boolean isAdmin) {
+    public User(int id,String name, String surname,String email, String password,boolean isModerator,boolean isAdmin, int next) {
         this.id=id;
         this.name = name+surname;
         this.email = email;
@@ -22,6 +23,7 @@ public class User {
         this.favCollections = new ArrayList<>();
         this.isModerator=isModerator;
         this.isAdmin=isAdmin;
+        this.nextFileName = next;
     }
 
     public int getId() {
@@ -70,5 +72,12 @@ public class User {
 
     public boolean isAdmin() {
         return isAdmin;
+    }
+
+    public int getNextFileName() {
+        return nextFileName;
+    }
+    public void incrementNextFileName() {
+        this.nextFileName++;
     }
 }

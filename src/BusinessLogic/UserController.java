@@ -43,13 +43,20 @@ public class UserController {
         }
     }
 
-    public void createDocument(String description, String documentPeriod,
-                               DocumentFormat format, String fileName,
-                               String filePath, String documentType){
-
+    public void createDocument(String documentTitle,String description, String documentPeriod,
+                               DocumentFormat format, List<String> tags){
         DocumentDAO documentDAO = new DocumentDAO();
         try{
-            documentDAO.addDocument(currentUser, description, documentPeriod, format, filePath, fileName, documentType);
+            String filePath="document/"+currentUser.getId()+"/";
+            String fileName="doc_"+currentUser.getNextFileName();
+            boolean created=documentDAO.addDocument(currentUser, documentTitle, description, documentPeriod, format, filePath, fileName, tags);
+
+            UserDAO userDAO = new UserDAO();
+
+            boolean updated = userDAO.updateNextFileName(currentUser.getId(), currentUser.getNextFileName() + 1);
+            if (updated && created) {
+                currentUser.incrementNextFileName();
+            }
         }catch (Exception e){
             System.err.println(e.getMessage());
         }

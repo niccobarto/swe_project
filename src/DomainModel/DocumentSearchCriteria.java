@@ -10,7 +10,7 @@ import java.util.Optional;
  */
 public class DocumentSearchCriteria {
 
-    private String documentName;
+    private String documentTitle;
     private Integer authorId;
     private DocumentStatus status;
     private DocumentFormat format;
@@ -18,12 +18,12 @@ public class DocumentSearchCriteria {
     private Date createdBefore;
     private List<String> tags;
 
-    public Optional<String> getDocumentName() {
-        return Optional.ofNullable(documentName);
+    public Optional<String> getDocumentTitle() {
+        return Optional.ofNullable(documentTitle);
     }
 
-    public void setDocumentName(String documentName) {
-        this.documentName = documentName;
+    public void setDocumentTitle(String documentName) {
+        this.documentTitle = documentName;
     }
 
     public Optional<Integer> getAuthorId() {

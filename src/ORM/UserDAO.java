@@ -21,7 +21,7 @@ public class UserDAO extends BaseDAO {
 
     public void addUser(String name, String surname, String email, String password, boolean isModerator, boolean isAdmin) {
         try{
-            String query = "INSERT INTO user (name,surname,email,password,is_moderator, is_admin) VALUES(?,?,?,?,?,?)";
+            String query = "INSERT INTO \"user\" (name,surname,email,password,is_moderator, is_admin) VALUES(?,?,?,?,?,?)";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, name);
             statement.setString(2, surname);
@@ -59,7 +59,7 @@ public class UserDAO extends BaseDAO {
     public User getUserById(int userId) {
         User user = null;
         try{
-            String query = "SELECT * FROM user WHERE id = ?";
+            String query = "SELECT * FROM \"user\" WHERE id = ?";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, userId);
             ResultSet rs= statement.executeQuery();
@@ -202,7 +202,7 @@ public class UserDAO extends BaseDAO {
     public User getUserByEmail(String email){
         User user=null;
         try{
-            String query = "SELECT * FROM user WHERE email = ?";
+            String query = "SELECT * FROM \"user\" WHERE \"email\" = ?";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, email);
             ResultSet rs= statement.executeQuery();
@@ -217,6 +217,27 @@ public class UserDAO extends BaseDAO {
         return user;
     }
 
+    public boolean updateNextFileName(int userId, int nextFileName){
+        try{
+            String query = "UPDATE \"user\" SET next_file_name = ? WHERE id = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, nextFileName);
+            statement.setInt(2, userId);
+            int affected = statement.executeUpdate();
+            statement.close();
+            if (affected > 0) {
+                System.out.println("Next file name updated successfully");
+                return true;
+            }
+            else{
+                System.out.println("User not found");
+                return false;
+            }
+        }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante updateNextFileName(userId=" + userId + ", nextFileName=" + nextFileName + ")", e);
+            return false;
+        }
+    }
     //------ private methods
 
     private User createUserFromResultSet(ResultSet rs) throws SQLException {
@@ -227,7 +248,8 @@ public class UserDAO extends BaseDAO {
         String password = rs.getString("password");
         boolean isModerator = rs.getBoolean("is_moderator");
         boolean isAdmin=rs.getBoolean("is_admin");
-        return new User(id, name, surname, email, password, isModerator, isAdmin);
+        int nextFileName=rs.getInt("next_file_name");
+        return new User(id, name, surname, email, password, isModerator, isAdmin, nextFileName);
     }
 }
 
