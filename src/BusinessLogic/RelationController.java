@@ -42,6 +42,24 @@ public class RelationController {
         }
     }
 
+    public void addRelation(Document destination, DocumentRelationType type){
+        DocumentRelationDAO relDAO = new DocumentRelationDAO();
+        try{
+            if(destination == null)
+                throw new IllegalArgumentException("Source or Destination document is null");
+            if(selected.getId() == destination.getId())
+                throw new IllegalArgumentException("Source and Destination documents are the same");
+            if(type == null)
+                throw new IllegalArgumentException("Relation type is null");
+            relDAO.addDocumentRelation(selected.getId(), destination.getId(), type);
+        }catch (Exception e){
+            System.err.println("addRelation failed: source=" + selected.getId() +
+                    ", destination=" + (destination != null ? destination.getId() : "null") +
+                    ", type=" + type);
+            e.printStackTrace();
+        }
+    }
+
     public ArrayList<Document> searchSourceRelations(DocumentRelationType type){
         DocumentRelationDAO relDAO = new DocumentRelationDAO();
         try {
