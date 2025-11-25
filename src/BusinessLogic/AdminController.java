@@ -7,13 +7,16 @@ import java.util.List;
 import java.util.Objects;
 
 public class AdminController {
+    private final User currentUser;
 
     public AdminController(User currentUser) {
         Objects.requireNonNull(currentUser);
         // Verifica che l'utente sia admin; se non lo è, blocchiamo la creazione del controller
         if (!currentUser.isAdmin()) {
+            //Todo capire come gestire la creazione del controller con un utente non admin
             throw new IllegalArgumentException("AdminController requires an admin user");
         }
+        this.currentUser=currentUser;
     }
 
     public User searchUserById(int userId){

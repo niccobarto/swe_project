@@ -60,6 +60,10 @@ public class RelationController {
         }
     }
 
+    public void removeRelation(Document destination){
+        //Todo
+    }
+
     public ArrayList<Document> searchSourceRelations(DocumentRelationType type){
         DocumentRelationDAO relDAO = new DocumentRelationDAO();
         try {

@@ -15,7 +15,6 @@ public class UserController {
         this.currentUser = Objects.requireNonNull(currentUser);
     }
 
-    //TODO: dopo aver deciso la search col prof creare il metodo searchDocuments
     public ArrayList<Document> searchDocuments(DocumentSearchCriteria criteria) {
         DocumentDAO documentDAO = new DocumentDAO();
         try {
