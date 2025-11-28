@@ -5,7 +5,6 @@ import DomainModel.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class UserController {
 
@@ -60,8 +59,6 @@ public class UserController {
             System.err.println(e.getMessage());
         }
     }
-
-    //TODO capire funzionamento assegnazioine tag per funzioni assignTag e removeTag
 
     public ArrayList <Document> viewOwnDocuments() {
         DocumentDAO documentDAO = new DocumentDAO();
@@ -163,6 +160,137 @@ public class UserController {
             userDAO.removeFavouriteCollection(currentUser.getId(), collectionId);
         } catch (Exception e) {
             System.err.println(e.getMessage());
+        }
+    }
+
+    public void requestAddExistingTag(int docId, String tagLabel){
+        DocumentDAO documentDAO = new DocumentDAO();
+        TagDAO tagDAO = new TagDAO();
+        TagChangeRequestDAO reqDAO = new TagChangeRequestDAO();
+
+        try {
+            if (tagLabel == null || tagLabel.isBlank())
+                throw new IllegalArgumentException("Tag label cannot be empty");
+
+            Document doc = documentDAO.getDocumentById(docId);
+            if (doc == null)
+                throw new IllegalArgumentException("Document not found");
+            if (doc.getAuthor() == null || doc.getAuthor().getId() != currentUser.getId())
+                throw new IllegalArgumentException("You are not the author of the document");
+
+            //trova tag
+            Tag tag = tagDAO.findByLabelNormalized(tagLabel);
+            if (tag == null)
+                throw new IllegalArgumentException("Tag does not exist. Use requestAddNewTag if you want to propose a new one.");
+
+            //evita doppioni
+            boolean duplicate = reqDAO.existsPendingDuplicate(
+                    docId,
+                    TagChangeOperation.ADD,
+                    tag.getLabel(),
+                    null
+            );
+            if (duplicate)
+                throw new IllegalArgumentException("There is already a pending request for this tag on this document.");
+
+            TagChangeRequest req = TagChangeRequest.forExistingTag(
+                    doc,
+                    tag.getLabel(),
+                    TagChangeOperation.ADD
+            );
+            reqDAO.addRequestForExistingTag(req);
+    }catch (Exception e) {
+            System.err.println("requestAddExistingTag failed: docId=" + docId +
+                    ", user=" + currentUser.getId() + ", label=" + tagLabel);
+            e.printStackTrace();
+        }
+    }
+
+    public void requestAddNewTag(int docId, String newLabel){
+        DocumentDAO documentDAO = new DocumentDAO();
+        TagDAO tagDAO = new TagDAO();
+        TagChangeRequestDAO reqDAO = new TagChangeRequestDAO();
+
+        try{
+            if (newLabel == null || newLabel.isBlank())
+                throw new IllegalArgumentException("Tag label cannot be empty");
+
+            String trimmed= newLabel.trim();
+
+            Document doc = documentDAO.getDocumentById(docId);
+            if (doc == null)
+                throw new IllegalArgumentException("Document not found");
+            if (doc.getAuthor() == null || doc.getAuthor().getId() != currentUser.getId())
+                throw new IllegalArgumentException("You are not the author of the document");
+            //controllo che non ci sia tag con questa label
+            Tag existing = tagDAO.findByLabelNormalized(trimmed);
+            if (existing != null)
+                throw new IllegalArgumentException("A tag with this label already exists. Use requestAddExistingTag instead.");
+            //evita doppioni pending
+            boolean duplicate = reqDAO.existsPendingDuplicate(
+                    docId,
+                    TagChangeOperation.ADD,
+                    null,
+                    trimmed
+            );
+            if (duplicate)
+                throw new IllegalArgumentException("There is already a pending request for this new tag on this document.");
+
+            TagChangeRequest req = TagChangeRequest.forNewLabel(doc, trimmed);
+            reqDAO.addRequestForNewTag(req);
+        }catch (Exception e) {
+            System.err.println("requestAddNewTag failed: docId=" + docId +
+                    ", user=" + currentUser.getId() + ", label=" + newLabel);
+            e.printStackTrace();
+        }
+    }
+
+    public void requestRemoveTag(int docId, String tagLabel) {
+        DocumentDAO documentDAO = new DocumentDAO();
+        TagDAO tagDAO = new TagDAO();
+        TagChangeRequestDAO reqDAO = new TagChangeRequestDAO();
+
+        try {
+            if (tagLabel == null || tagLabel.isBlank())
+                throw new IllegalArgumentException("Tag label cannot be empty.");
+
+            Document doc = documentDAO.getDocumentById(docId);
+            if (doc == null)
+                throw new IllegalArgumentException("Document not found.");
+            if (doc.getAuthor() == null || doc.getAuthor().getId() != currentUser.getId())
+                throw new IllegalArgumentException("You are not the author of this document.");
+
+            Tag tag = tagDAO.findByLabelNormalized(tagLabel);
+            if (tag == null)
+                throw new IllegalArgumentException("Tag does not exist.");
+
+            // evito duplicati
+            boolean duplicate = reqDAO.existsPendingDuplicate(
+                    docId,
+                    TagChangeOperation.REMOVE,
+                    tag.getLabel(),
+                    null
+            );
+            if (duplicate)
+                throw new IllegalArgumentException(
+                        "There is already a pending remove request for this tag on this document."
+                );
+
+            TagChangeRequest req = TagChangeRequest.forExistingTag(
+                    doc,
+                    tag.getLabel(),
+                    TagChangeOperation.REMOVE
+            );
+
+            reqDAO.addRequestForExistingTag(req);
+
+        } catch (Exception e) {
+            System.err.println(
+                    "requestRemoveTag failed: docId=" + docId +
+                            ", user=" + currentUser.getId() +
+                            ", tag='" + tagLabel + "'"
+            );
+            e.printStackTrace();
         }
     }
 }
