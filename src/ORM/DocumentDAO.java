@@ -103,47 +103,33 @@ public class DocumentDAO extends BaseDAO {
         }
     }
 
-    public void addTag(Tag t,int documentId){
-        try{
-            // inserisce il tag nella tabella tag (colonne esplicite)
-            String query = "INSERT INTO tag (tag_label, description) VALUES(?,?)";
+    public void addTagToDocument(int documentId, String tagLabel) {
+        try {
+            String query = "INSERT INTO DocumentTags (document_id, tag_label) VALUES (?, ?)";
             PreparedStatement ps = connection.prepareStatement(query);
-            ps.setString(1, t.getLabel());
-            ps.setString(2, t.getDescription());
+            ps.setInt(1, documentId);
+            ps.setString(2, tagLabel);
             ps.executeUpdate();
             ps.close();
-
-            // link tra documento e tag (se la tabella DocumentTags esiste)
-            try {
-                String linkQuery = "INSERT INTO DocumentTags (document_id, tag_label) VALUES(?,?)";
-                PreparedStatement linkStmt = connection.prepareStatement(linkQuery);
-                linkStmt.setInt(1, documentId);
-                linkStmt.setString(2, t.getLabel());
-                linkStmt.executeUpdate();
-                linkStmt.close();
-            } catch (SQLException ex) {
-                LOGGER.log(Level.WARNING, "Impossibile collegare il tag al documento (potrebbe non esistere la tabella di link)", ex);
-            }
-
-        }catch (SQLException e){
-            LOGGER.log(Level.SEVERE, "Errore durante addTag(documentId=" + documentId + ")", e);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE,
+                    "Error during addExistingTagToDocument(docId=" + documentId +
+                            ", tagLabel=" + tagLabel + ")", e);
         }
     }
 
-    public void removeTag(int tagId){
+    public void removeTagFromDocument(int documentId, String tagLabel) {
         try {
-            String query = "DELETE FROM tag WHERE tag_id = ?";
+            String query = "DELETE FROM DocumentTags WHERE document_id = ? AND tag_label = ?";
             PreparedStatement ps = connection.prepareStatement(query);
-            ps.setInt(1, tagId);
-            int affected = ps.executeUpdate();
-            if (affected > 0) {
-                System.out.println("Tag removed successfully");
-            } else {
-                System.out.println("Tag not found");
-            }
+            ps.setInt(1, documentId);
+            ps.setString(2, tagLabel);
+            ps.executeUpdate();
             ps.close();
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Errore durante removeTag(tagId=" + tagId + ")", e);
+            LOGGER.log(Level.SEVERE,
+                    "Error during removeTagFromDocument(docId=" + documentId +
+                            ", tagLabel=" + tagLabel + ")", e);
         }
     }
 
@@ -185,8 +171,8 @@ public class DocumentDAO extends BaseDAO {
 
     private List<Tag> getTagsForDocument(int documentId) {
         List<Tag> tags = new ArrayList<>();
-        String query = "SELECT t.label, t.description FROM tag t " +
-                "JOIN document_tags dt ON dt.tag_label = t.label WHERE dt.document_id = ?";
+        String query = "SELECT t.tag_label, t.description FROM tag t " +
+                "JOIN document_tags dt ON dt.tag_label = t.tag_label WHERE dt.document_id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, documentId);
             try (ResultSet rs = stmt.executeQuery()) {

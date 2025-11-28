@@ -25,6 +25,20 @@ public class TagDAO extends BaseDAO {
         return s == null ? null: s.trim().toLowerCase();
     }
 
+    public void addTag(Tag t) {
+        try {
+            String q = "INSERT INTO tag (tag_label, description) VALUES (?, ?)";
+            PreparedStatement ps = connection.prepareStatement(q);
+            ps.setString(1, t.getLabel());
+            ps.setString(2, t.getDescription());
+            ps.executeUpdate();
+            ps.close();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE,
+                    "Error during addTag(label=" + t.getLabel() + ")", e);
+        }
+    }
+
     public Tag findByLabel(String tagLabel){ // non so se usare entrambi o meno
         try{
             String query = "SELECT tag_label, description FROM tag WHERE tag_label = ?";
