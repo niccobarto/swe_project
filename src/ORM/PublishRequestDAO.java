@@ -45,10 +45,7 @@ public class PublishRequestDAO extends BaseDAO {
             LOGGER.log(Level.SEVERE, "Errore durante removeRequest(docId=" + docId + ")", e);
         }
     }
-    //Todo da decidere se permettere di modificare la richiesta
-    // anche ad altri moderatori.
-    // In caso per ogni aggiornamento va creata una nuova istanza di
-    // PublishRequestManaged nel DB.
+
     public void updateRequestStatus(int docId,int moderator_id,RequestStatus status){
         try{
             String query = "INSERT INTO publish_request_managed (publish_request_id,moderator_id) VALUES(?,?)";
@@ -68,12 +65,12 @@ public class PublishRequestDAO extends BaseDAO {
             LOGGER.log(Level.SEVERE, "Errore durante updateRequestStatus(docId=" + docId + ", moderatorId=" + moderator_id + ")", e);
         }
     }
-    public List<PublishRequest> getRequestByModerator(int mdoeratorId){
+    public List<PublishRequest> getRequestByModerator(int moderatorId){
         List<PublishRequest> publishRequests=new ArrayList<PublishRequest>();
         try{
             String query="SELECT * FROM publish_request_managed WHERE moderator_id=?";
             PreparedStatement ps=connection.prepareStatement(query);
-            ps.setInt(1,mdoeratorId);
+            ps.setInt(1, moderatorId);
             ResultSet rs=ps.executeQuery();
             while(rs.next()){
                 publishRequests.add(createRequestFromResultSet(rs));
@@ -81,7 +78,7 @@ public class PublishRequestDAO extends BaseDAO {
             rs.close();
             ps.close();
         }catch (SQLException e){
-            LOGGER.log(Level.SEVERE, "Errore durante getRequestByModerator(moderatorId=" + mdoeratorId + ")", e);
+            LOGGER.log(Level.SEVERE, "Errore durante getRequestByModerator(moderatorId=" + moderatorId + ")", e);
         }
         return publishRequests;
     }

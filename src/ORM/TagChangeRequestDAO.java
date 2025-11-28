@@ -77,15 +77,23 @@ public class TagChangeRequestDAO extends BaseDAO {
     }
 
     //aggiorna stato e imposta date_result
-    public void updateStatus(int requestId, RequestStatus newStatus) {
+    public void updateStatus(int requestId,int moderatorId, RequestStatus newStatus) {
         try{
-            String q = "UPDATE tag_change_request SET status = ?, date_result = ? WHERE id = ?";
-            PreparedStatement ps = connection.prepareStatement(q);
-            ps.setString(1, newStatus.toString());
-            ps.setDate(2, new java.sql.Date(System.currentTimeMillis()));
-            ps.setInt(3, requestId);
-            int affected = ps.executeUpdate(); //quante righe modificate
-            ps.close();
+            String q1 = "INSERT INTO tag_change_request_managed " +
+                    "(tag_change_request_id, moderator_id) VALUES (?, ?)";
+            PreparedStatement ps1 = connection.prepareStatement(q1);
+            ps1.setInt(1, requestId);
+            ps1.setInt(2, moderatorId);
+            ps1.executeUpdate();
+            ps1.close();
+
+            String q2 = "UPDATE tag_change_request SET status = ?, date_result = ? WHERE id = ?";
+            PreparedStatement ps2 = connection.prepareStatement(q2);
+            ps2.setString(1, newStatus.toString());
+            ps2.setDate(2, new java.sql.Date(System.currentTimeMillis()));
+            ps2.setInt(3, requestId);
+            int affected = ps2.executeUpdate(); //quante righe modificate
+            ps2.close();
 
             if (affected == 0)
                 LOGGER.log(Level.WARNING, "updateStatus affected 0 rows (requestId=" + requestId + ")");
@@ -113,6 +121,26 @@ public class TagChangeRequestDAO extends BaseDAO {
         }
     }
 
+    public List<TagChangeRequest> getPending() {
+        List<TagChangeRequest> out = new ArrayList<>();
+        try {
+            String q = "SELECT * FROM tag_change_request " +
+                    "WHERE status = ? " +
+                    "ORDER BY date_request ASC";
+            PreparedStatement ps = connection.prepareStatement(q);
+            ps.setString(1, RequestStatus.PENDING.toString());
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                out.add(map(rs));
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error during getPending()", e);
+        }
+        return out;
+    }
+
     private TagChangeRequest map(ResultSet rs) throws SQLException {
         int documentId = rs.getInt("document_id");
         Document document = new DocumentDAO().getDocumentById(documentId);
@@ -129,7 +157,36 @@ public class TagChangeRequestDAO extends BaseDAO {
         return r;
     }
 
-    //lista richieste autorizzate da autore
+    public List<TagChangeRequest> getRequestByModerator(int moderatorId) {
+        List<TagChangeRequest> requests = new ArrayList<>();
+
+        try {
+            String q = "SELECT tag_change_request_id " +
+                    "FROM tag_change_request_managed " +
+                    "WHERE moderator_id = ?";
+            PreparedStatement ps = connection.prepareStatement(q);
+            ps.setInt(1, moderatorId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                int reqId = rs.getInt("tag_change_request_id");
+                TagChangeRequest r = getById(reqId);
+                if (r != null) {
+                    requests.add(r);
+                }
+            }
+
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE,
+                    "Error during getRequestByModerator(moderatorId=" + moderatorId + ")", e);
+        }
+
+        return requests;
+    }
+
+    //lista richieste fatte da autore
     public List<TagChangeRequest> getByAuthor(int userId) {
         List<TagChangeRequest> out = new ArrayList<>();
         try {
