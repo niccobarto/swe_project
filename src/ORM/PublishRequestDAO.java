@@ -21,12 +21,11 @@ public class PublishRequestDAO extends BaseDAO {
     }
     public void addRequest(Document doc) {
         try{
-            String query="INSERT INTO publish_request (document_id,request_status,date_request,author_id) VALUES(?,?,?,?)";
+            String query="INSERT INTO publish_request (document_id,request_status,date_request) VALUES(?,?,?)";
             PreparedStatement ps=connection.prepareStatement(query);
             ps.setInt(1,doc.getId());
             ps.setString(2, RequestStatus.PENDING.toString());
             ps.setDate(3, java.sql.Date.valueOf(java.time.LocalDate.now()));
-            ps.setInt(4,doc.getAuthor().getId());
             ps.executeUpdate();
             ps.close();
 
@@ -48,14 +47,8 @@ public class PublishRequestDAO extends BaseDAO {
 
     public void updateRequestStatus(int docId,int moderator_id,RequestStatus status){
         try{
-            String query = "INSERT INTO publish_request_managed (publish_request_id,moderator_id) VALUES(?,?)";
-            PreparedStatement ps=connection.prepareStatement(query);
-            ps.setInt(1,docId);
-            ps.setInt(2,moderator_id);
-            ps.executeUpdate();
-            ps.close();
-            String query2="UPDATE publish_request SET request_status=?,date_result=? WHERE document_id=?";
-            PreparedStatement ps2=connection.prepareStatement(query2);
+            String query="UPDATE publish_request SET request_status=?,date_result=? WHERE document_id=?";
+            PreparedStatement ps2=connection.prepareStatement(query);
             ps2.setString(1,status.toString());
             ps2.setDate(2,java.sql.Date.valueOf(java.time.LocalDate.now()));
             ps2.setInt(3,docId);
@@ -68,7 +61,7 @@ public class PublishRequestDAO extends BaseDAO {
     public List<PublishRequest> getRequestByModerator(int moderatorId){
         List<PublishRequest> publishRequests=new ArrayList<PublishRequest>();
         try{
-            String query="SELECT * FROM publish_request_managed WHERE moderator_id=?";
+            String query="SELECT * FROM publish_request WHERE moderator_id=?";
             PreparedStatement ps=connection.prepareStatement(query);
             ps.setInt(1, moderatorId);
             ResultSet rs=ps.executeQuery();
@@ -85,7 +78,7 @@ public class PublishRequestDAO extends BaseDAO {
     public List<PublishRequest> getRequestsByAuthor(int userId){
         List<PublishRequest> publishRequests=new ArrayList<PublishRequest>();
         try{
-            String query="SELECT * FROM publish_request WHERE author_id=?";
+            String query="SELECT * FROM publish_request pr JOIN document ON pr.id=d.id WHERE d.author_id=?";
             PreparedStatement ps=connection.prepareStatement(query);
             ps.setInt(1,userId);
             ResultSet rs=ps.executeQuery();
@@ -120,7 +113,7 @@ public class PublishRequestDAO extends BaseDAO {
 //-----private Methods-----
     private PublishRequest createRequestFromResultSet(ResultSet rs) throws SQLException {
         int id=rs.getInt("id");
-        String motivation=rs.getString("motivation");
+        String motivation=rs.getString("denial_motivation");
         Date dateRequest=rs.getDate("date_request");
         Date dateResult=rs.getDate("date_result");
         Document document=new DocumentDAO().getDocumentById(rs.getInt("document_id"));
