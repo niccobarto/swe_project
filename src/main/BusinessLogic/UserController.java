@@ -42,12 +42,12 @@ public class UserController {
     }
 
     public void createDocument(String documentTitle,String description, String documentPeriod,
-                               DocumentFormat format, List<String> tags){
+                               DocumentFormat format){
         DocumentDAO documentDAO = new DocumentDAO();
         try{
             String filePath="document/"+currentUser.getId()+"/";
             String fileName="doc_"+currentUser.getNextFileName();
-            boolean created=documentDAO.addDocument(currentUser, documentTitle, description, documentPeriod, format, filePath, fileName, tags);
+            boolean created=documentDAO.addDocument(currentUser, documentTitle, description, documentPeriod, format, filePath, fileName);
 
             UserDAO userDAO = new UserDAO();
 
@@ -59,7 +59,19 @@ public class UserController {
             System.err.println(e.getMessage());
         }
     }
-
+    public void deleteDocument(int documentId){
+        DocumentDAO documentDAO = new DocumentDAO();
+        try{
+            Document doc= documentDAO.getDocumentById(documentId);
+            if( doc == null)
+                throw new IllegalArgumentException("Document not found");
+            if ( doc.getAuthor() == null || doc.getAuthor().getId() != currentUser.getId())
+                throw new IllegalArgumentException("You are not the author of the document");
+            documentDAO.deleteDocument(documentId);
+        } catch (Exception e){
+            System.err.println(e.getMessage());
+        }
+    }
     public ArrayList <Document> viewOwnDocuments() {
         DocumentDAO documentDAO = new DocumentDAO();
         try{

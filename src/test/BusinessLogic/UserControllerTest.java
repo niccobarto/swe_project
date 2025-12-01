@@ -310,7 +310,7 @@ class UserControllerTest {
         int colId = collectionDAO.getCollectionsByUser(currentUser.getId()).get(0).getId();
         controller.addCollectionToFavourites(colId);
         try {
-            PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) AS cnt FROM favourite_collections WHERE user_id=? AND collection_id=?");
+            PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) AS cnt FROM favourite_collection WHERE user_id=? AND collection_id=?");
             ps.setInt(1, currentUser.getId());
             ps.setInt(2, colId);
             ResultSet rs = ps.executeQuery();
@@ -335,7 +335,7 @@ class UserControllerTest {
         controller.addCollectionToFavourites(colId);
         controller.removeCollectionFromFavourites(colId);
         try {
-            PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) AS cnt FROM favourite_collections WHERE user_id=? AND collection_id=?");
+            PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) AS cnt FROM favourite_collection WHERE user_id=? AND collection_id=?");
             ps.setInt(1, currentUser.getId());
             ps.setInt(2, colId);
             ResultSet rs = ps.executeQuery();
