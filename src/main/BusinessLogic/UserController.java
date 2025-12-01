@@ -42,12 +42,12 @@ public class UserController {
     }
 
     public void createDocument(String documentTitle,String description, String documentPeriod,
-                               DocumentFormat format){
+                               DocumentFormat format,List<String> tags){
         DocumentDAO documentDAO = new DocumentDAO();
         try{
             String filePath="document/"+currentUser.getId()+"/";
             String fileName="doc_"+currentUser.getNextFileName();
-            boolean created=documentDAO.addDocument(currentUser, documentTitle, description, documentPeriod, format, filePath, fileName);
+            boolean created=documentDAO.addDocument(currentUser, documentTitle, description, documentPeriod, format, filePath, fileName,tags);
 
             UserDAO userDAO = new UserDAO();
 

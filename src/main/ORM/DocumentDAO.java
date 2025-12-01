@@ -23,7 +23,8 @@ public class DocumentDAO extends BaseDAO {
                             String documentPeriod,
                             DocumentFormat documentFormat,
                             String filePath,
-                            String fileName){
+                            String fileName,
+                            List<String> tags){
 
         try{
             String query = "INSERT INTO document (file_name,description,status,period,file_format,file_path,author_id,creation_date,title) VALUES(?,?,?,?,?,?,?,?,?)";
