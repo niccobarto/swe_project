@@ -16,7 +16,7 @@ public class CommentDAO extends BaseDAO {
     }
     public void addComment(String text, int commentAuthorId,int documentId){
         try{
-            String query = "INSERT INTO comments (user_id,document_id,text,date) VALUES(?,?,?,?)";
+            String query = "INSERT INTO comment (user_id,document_id,text,date) VALUES(?,?,?,?)";
             var statement = connection.prepareStatement(query);
             statement.setInt(1, commentAuthorId);
             statement.setInt(2, documentId);
@@ -30,7 +30,7 @@ public class CommentDAO extends BaseDAO {
     }
     public void removeComment(int commentId){
         try{
-            String query = "DELETE FROM comments WHERE id = ?";
+            String query = "DELETE FROM comment WHERE id = ?";
             var statement = connection.prepareStatement(query);
             statement.setInt(1, commentId);
             statement.executeUpdate();
@@ -42,7 +42,7 @@ public class CommentDAO extends BaseDAO {
     public List<Comment> getCommentsByAuthor(int userId){
         List<Comment> comments = new ArrayList<>();
         try{
-            String query = "SELECT * FROM comments WHERE user_id = ?";
+            String query = "SELECT * FROM comment WHERE user_id = ?";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, userId);
             ResultSet rs = statement.executeQuery();
@@ -60,7 +60,7 @@ public class CommentDAO extends BaseDAO {
     public List<Comment> getCommentsByDocument(int documentId){
         List<Comment> comments = new ArrayList<>();
         try{
-            String query = "SELECT * FROM comments WHERE document_id = ?";
+            String query = "SELECT * FROM comment WHERE document_id = ?";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, documentId);
             ResultSet rs = statement.executeQuery();
