@@ -50,38 +50,38 @@ public class DocumentDAO extends BaseDAO {
     public void deleteDocument(int documentId){
         try{
             // rimuovi riferimenti dipendenti per evitare vincoli FK
-            String q1 = "DELETE FROM FavouriteDocuments WHERE document_id = ?";
+            String q1 = "DELETE FROM favourite_document WHERE document_id = ?";
             PreparedStatement st1 = connection.prepareStatement(q1);
             st1.setInt(1, documentId);
             st1.executeUpdate();
             st1.close();
 
-            String q2 = "DELETE FROM DocumentRelation WHERE source_id = ? OR destination_id = ?";
+            String q2 = "DELETE FROM document_relation WHERE source_id = ? OR destination_id = ?";
             PreparedStatement st2 = connection.prepareStatement(q2);
             st2.setInt(1, documentId);
             st2.setInt(2, documentId);
             st2.executeUpdate();
             st2.close();
 
-            String q3 = "DELETE FROM DocumentTags WHERE document_id = ?";
+            String q3 = "DELETE FROM document_tags WHERE document_id = ?";
             PreparedStatement st3 = connection.prepareStatement(q3);
             st3.setInt(1, documentId);
             st3.executeUpdate();
             st3.close();
 
-            String q4 = "DELETE FROM Comment WHERE document_id = ?";
+            String q4 = "DELETE FROM comment WHERE document_id = ?";
             PreparedStatement st4 = connection.prepareStatement(q4);
             st4.setInt(1, documentId);
             st4.executeUpdate();
             st4.close();
 
-            String q5 = "DELETE FROM PublishRequest WHERE document_id = ?";
+            String q5 = "DELETE FROM publish_request WHERE document_id = ?";
             PreparedStatement st5 = connection.prepareStatement(q5);
             st5.setInt(1, documentId);
             st5.executeUpdate();
             st5.close();
 
-            String q6= "DELETE FROM DocumentCollection WHERE document_id = ?";
+            String q6= "DELETE FROM document_collection WHERE document_id = ?";
             PreparedStatement st6 = connection.prepareStatement(q6);
             st6.setInt(1, documentId);
             st6.executeUpdate();
@@ -105,7 +105,7 @@ public class DocumentDAO extends BaseDAO {
 
     public void addTagToDocument(int documentId, String tagLabel) {
         try {
-            String query = "INSERT INTO DocumentTags (document_id, tag_label) VALUES (?, ?)";
+            String query = "INSERT INTO document_tags (document_id, tag_label) VALUES (?, ?)";
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setInt(1, documentId);
             ps.setString(2, tagLabel);
@@ -120,7 +120,7 @@ public class DocumentDAO extends BaseDAO {
 
     public void removeTagFromDocument(int documentId, String tagLabel) {
         try {
-            String query = "DELETE FROM DocumentTags WHERE document_id = ? AND tag_label = ?";
+            String query = "DELETE FROM document_tags WHERE document_id = ? AND tag_label = ?";
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setInt(1, documentId);
             ps.setString(2, tagLabel);
