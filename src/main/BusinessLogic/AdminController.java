@@ -113,7 +113,13 @@ public class AdminController {
     }
 
     public void removeComment(int commentId){
-        //Todo
+        ensureAdmin();
+        try{
+            CommentDAO commentDAO = new CommentDAO();
+            commentDAO.removeComment(commentId);
+        }catch(Exception e){
+            System.err.println("removeComment failed: " + e);
+        }
     }
     public List<Document> documentsApprovedByModerator(int moderatorId){
         ensureAdmin();

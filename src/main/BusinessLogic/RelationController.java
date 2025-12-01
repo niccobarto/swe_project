@@ -61,7 +61,16 @@ public class RelationController {
     }
 
     public void removeRelation(Document destination){
-        //Todo
+        DocumentRelationDAO relDAO = new DocumentRelationDAO();
+        try{
+            if(destination == null)
+                throw new IllegalArgumentException("Source or Destination document is null");
+            relDAO.removeDocumentRelation(selected.getId(), destination.getId());
+        }catch (Exception e){
+            System.err.println("removeRelation failed: source=" + selected.getId() +
+                    ", destination=" + (destination != null ? destination.getId() : "null"));
+            e.printStackTrace();
+        }
     }
 
     public ArrayList<Document> searchSourceRelations(DocumentRelationType type){
