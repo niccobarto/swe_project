@@ -8,18 +8,14 @@ import java.util.Objects;
 
 public class AdminController {
     private final User currentUser;
-    private UserDAO userDAO;
-
     public AdminController(User currentUser) {
         Objects.requireNonNull(currentUser);
-        this.userDAO = new UserDAO();
         // Non blocchiamo più la creazione del controller; i controlli di autorizzazione
         // vengono effettuati all'inizio di ogni operazione tramite ensureAdmin().
         this.currentUser = currentUser;
     }
     public AdminController(User currentUser, UserDAO userDAO) {
         Objects.requireNonNull(currentUser);
-        this.userDAO = userDAO;
         // Non blocchiamo più la creazione del controller; i controlli di autorizzazione
         // vengono effettuati all'inizio di ogni operazione tramite ensureAdmin().
         this.currentUser = currentUser;

@@ -47,11 +47,12 @@ public class PublishRequestDAO extends BaseDAO {
 
     public void updateRequestStatus(int docId,int moderator_id,RequestStatus status){
         try{
-            String query="UPDATE publish_request SET request_status=?,date_result=? WHERE document_id=?";
+            String query="UPDATE publish_request SET request_status=?,date_result=?, moderator_id=? WHERE document_id=?";
             PreparedStatement ps2=connection.prepareStatement(query);
             ps2.setString(1,status.toString());
             ps2.setDate(2,java.sql.Date.valueOf(java.time.LocalDate.now()));
-            ps2.setInt(3,docId);
+            ps2.setInt(3,moderator_id);
+            ps2.setInt(4,docId);
             ps2.executeUpdate();
             ps2.close();
         }catch (SQLException e){

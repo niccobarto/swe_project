@@ -19,7 +19,7 @@ public class ModeratorController {
         PublishRequestDAO publishRequestDAO = new PublishRequestDAO();
         DocumentDAO documentDAO = new DocumentDAO();
         try{
-            if(!currentUser.isModerator())
+            if(!currentUser.isModerator() || !currentUser.isAdmin())
                 throw new IllegalArgumentException("Current user is not moderator");
             if( decision == null || decision == RequestStatus.PENDING)
                 throw new IllegalArgumentException("Invalid decision");
@@ -40,7 +40,7 @@ public class ModeratorController {
     public ArrayList<PublishRequest> viewPendingRequests(){
         PublishRequestDAO publishRequestDAO = new PublishRequestDAO();
         try{
-            if (!currentUser.isModerator())
+            if (!currentUser.isModerator() || !currentUser.isAdmin())
                 throw new IllegalArgumentException("Current user is not moderator");
             return new ArrayList<>(publishRequestDAO.getRequestsByStatus(RequestStatus.PENDING));
         } catch (Exception e){
@@ -56,7 +56,7 @@ public class ModeratorController {
         DocumentDAO documentDAO = new DocumentDAO();
 
         try {
-            if (!currentUser.isModerator())
+            if (!currentUser.isModerator() || !currentUser.isAdmin())
                 throw new IllegalArgumentException("Current user is not moderator");
             if (decision == null || decision == RequestStatus.PENDING)
                 throw new IllegalArgumentException("Invalid decision");

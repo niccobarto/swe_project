@@ -152,7 +152,7 @@ public class CollectionDAO extends BaseDAO {
     //private methods
 
     private Collection createCollectionFromResultSet(ResultSet rs) throws SQLException {
-        int id=rs.getInt("collection_id");
+        int id=rs.getInt("id");
         String name=rs.getString("collection_name");
         String description=rs.getString("description");
         UserDAO userDao=new UserDAO();

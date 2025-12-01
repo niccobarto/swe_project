@@ -186,7 +186,7 @@ public class UserDAO extends BaseDAO {
     public List<User> getAllUsers(){
         List<User> users = new ArrayList<>();
         try{
-            String query = "SELECT * FROM user";
+            String query = "SELECT * FROM \"user\"";
             PreparedStatement statement = connection.prepareStatement(query);
             ResultSet rs= statement.executeQuery();
             while(rs.next()) {
