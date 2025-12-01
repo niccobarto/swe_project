@@ -95,7 +95,7 @@ public class UserDAO extends BaseDAO {
     }
     public void addFavouriteDocuments(int userId,int documentId){
         try{
-            String query = "INSERT INTO favourite_documents (user_id,document_id) VALUES(?,?)";
+            String query = "INSERT INTO favourite_document (user_id,document_id) VALUES(?,?)";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, userId);
             statement.setInt(2, documentId);
@@ -113,7 +113,7 @@ public class UserDAO extends BaseDAO {
     }
     public void removeFavouriteDocuments(int userId,int documentId){
         try{
-            String query = "DELETE FROM favourite_documents WHERE user_id = ? AND document_id = ?";
+            String query = "DELETE FROM favourite_document WHERE user_id = ? AND document_id = ?";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, userId);
             statement.setInt(2, documentId);
@@ -131,7 +131,7 @@ public class UserDAO extends BaseDAO {
     }
     public void addFavouriteCollection(int userId,int collectionId){
         try{
-            String query = "INSERT INTO favourite_collections (user_id,collection_id) VALUES(?,?)";
+            String query = "INSERT INTO favourite_collection (user_id,collection_id) VALUES(?,?)";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, userId);
             statement.setInt(2, collectionId);
@@ -149,7 +149,7 @@ public class UserDAO extends BaseDAO {
     }
     public void removeFavouriteCollection(int userId,int collectionId){
         try{
-            String query = "DELETE FROM favourite_collections WHERE user_id = ? AND collection_id = ?";
+            String query = "DELETE FROM favourite_collection WHERE user_id = ? AND collection_id = ?";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, userId);
             statement.setInt(2, collectionId);
@@ -168,7 +168,7 @@ public class UserDAO extends BaseDAO {
     public List<Document> getFavouriteDocument(int userId){
         List<Document> documents = new ArrayList<>();
         try{
-            String query = "SELECT document_id FROM favourite_documents WHERE user_id = ?";
+            String query = "SELECT document_id FROM favourite_document WHERE user_id = ?";
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setInt(1, userId);
             ResultSet rs=ps.executeQuery();
