@@ -8,9 +8,21 @@ import java.util.Objects;
 
 public class AdminController {
     private final User currentUser;
+    private UserDAO userDAO;
 
     public AdminController(User currentUser) {
         Objects.requireNonNull(currentUser);
+        this.userDAO = new UserDAO();
+        // Verifica che l'utente sia admin; se non lo è, blocchiamo la creazione del controller
+        if (!currentUser.isAdmin()) {
+            //Todo capire come gestire la creazione del controller con un utente non admin
+            throw new IllegalArgumentException("AdminController requires an admin user");
+        }
+        this.currentUser=currentUser;
+    }
+    public AdminController(User currentUser, UserDAO userDAO) {
+        Objects.requireNonNull(currentUser);
+        this.userDAO = userDAO;
         // Verifica che l'utente sia admin; se non lo è, blocchiamo la creazione del controller
         if (!currentUser.isAdmin()) {
             //Todo capire come gestire la creazione del controller con un utente non admin

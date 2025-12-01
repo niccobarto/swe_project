@@ -12,7 +12,6 @@ public class DocumentSearchCriteria {
 
     private String documentTitle;
     private Integer authorId;
-    private DocumentStatus status;
     private DocumentFormat format;
     private Date createdAfter;
     private Date createdBefore;
@@ -32,14 +31,6 @@ public class DocumentSearchCriteria {
 
     public void setAuthorId(Integer authorId) {
         this.authorId = authorId;
-    }
-
-    public Optional<DocumentStatus> getStatus() {
-        return Optional.ofNullable(status);
-    }
-
-    public void setStatus(DocumentStatus status) {
-        this.status = status;
     }
 
     public Optional<DocumentFormat> getFormat() {

@@ -3,14 +3,21 @@ package BusinessLogic;
 import ORM.UserDAO;
 import DomainModel.User;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class LoginController {
 
+    private final UserDAO userDAO;
+
+    public LoginController(){
+        this.userDAO = new UserDAO();
+    }
+
+    public LoginController(UserDAO userDAO){
+        this.userDAO = userDAO;
+    }
+
     public User login(String email, String password) {
-        UserDAO userDAO = new UserDAO();
         try {
             if (email == null || email.isBlank())
                 throw new IllegalArgumentException("Email cannot be empty");
@@ -31,7 +38,6 @@ public class LoginController {
 
     public User register(String name, String surname, String email, String password, boolean isModerator,boolean isAdmin) {
         User user=null;
-        UserDAO userDAO = new UserDAO();
         try {
             if (name == null || name.isBlank())
                 throw new IllegalArgumentException("Name cannot be empty");
@@ -57,7 +63,6 @@ public class LoginController {
     }
 
     public boolean isEmailAvailable(String email) {
-        UserDAO userDAO = new UserDAO();
         try {
             if (email == null || email.isBlank())
                 throw new IllegalArgumentException("Email cannot be empty");

@@ -273,11 +273,6 @@ public class DocumentDAO extends BaseDAO {
                 queryBuilder.append(" AND author_id = ?");
                 parameters.add(criteria.getAuthorId().get());
             }
-            //Todo togliere ricerca per status
-            if (criteria.getStatus().isPresent()) {
-                queryBuilder.append(" AND status = ?");
-                parameters.add(criteria.getStatus().get().toString());
-            }
             if (criteria.getFormat().isPresent()) {
                 queryBuilder.append(" AND file_format = ?");
                 parameters.add(criteria.getFormat().get().toString());

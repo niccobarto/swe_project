@@ -6,7 +6,6 @@ import java.util.List;
 public class DocumentSearchCriteriaBuilder {
     private String documentTitle;
     private Integer authorId;
-    private DocumentStatus status;
     private DocumentFormat format;
     private Date createdAfter;
     private Date createdBefore;
@@ -20,10 +19,7 @@ public class DocumentSearchCriteriaBuilder {
         this.authorId = authorId;
         return this;
     }
-    public DocumentSearchCriteriaBuilder setStatus(DocumentStatus status) {
-        this.status = status;
-        return this;
-    }
+
     public DocumentSearchCriteriaBuilder setFormat(DocumentFormat format) {
         this.format = format;
         return this;
@@ -51,7 +47,6 @@ public class DocumentSearchCriteriaBuilder {
         DocumentSearchCriteria criteria = new DocumentSearchCriteria();
         criteria.setDocumentTitle(this.documentTitle);
         criteria.setAuthorId(this.authorId);
-        criteria.setStatus(this.status);
         criteria.setFormat(this.format);
         criteria.setCreatedAfter(this.createdAfter);
         criteria.setCreatedBefore(this.createdBefore);
