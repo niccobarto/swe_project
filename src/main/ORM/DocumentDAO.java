@@ -160,10 +160,11 @@ public class DocumentDAO extends BaseDAO {
         String filePath = rs.getString("file_path");
         String fileName = rs.getString("file_name");
         Date creationDate = rs.getDate("creation_date");
+        String period = rs.getString("period");
 
         DocumentStatus status = statusStr != null ? DocumentStatus.valueOf(statusStr) : DocumentStatus.DRAFT;
         User author = new UserDAO().getUserById(authorId);
-        Document document = new Document(id, title ,description, DocumentFormat.valueOf(fileFormat), author, filePath, fileName, creationDate);
+        Document document = new Document(id, title ,description, DocumentFormat.valueOf(fileFormat), author, filePath, fileName, creationDate,period);
         document.setStatus(status);
         document.setTags(getTagsForDocument(id));
         return document;

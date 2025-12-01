@@ -15,8 +15,9 @@ public class Document {
     private String filePath;
     private Date creationDate;
     private List<Tag> tags;
+    private String period;
 
-    public Document(int id, String title,String description,DocumentFormat format,User author,String filePath, String fileName,Date creationDate){
+    public Document(int id, String title,String description,DocumentFormat format,User author,String filePath, String fileName,Date creationDate,String period){
         this.id=id;
         this.title=title;
         this.description=description;
@@ -27,6 +28,7 @@ public class Document {
         this.fileName = fileName;
         this.creationDate = creationDate;
         this.tags=new ArrayList<>();
+        this.period=period;
     }
     public int getId() {
         return id;
@@ -102,5 +104,11 @@ public class Document {
         this.tags = tags;
     }
 
+    public void setPeriod(String period) {
+        this.period = period;
+    }
+    public String getPeriod() {
+        return period;
+    }
 }
 
