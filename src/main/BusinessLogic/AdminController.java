@@ -13,25 +13,27 @@ public class AdminController {
     public AdminController(User currentUser) {
         Objects.requireNonNull(currentUser);
         this.userDAO = new UserDAO();
-        // Verifica che l'utente sia admin; se non lo è, blocchiamo la creazione del controller
-        if (!currentUser.isAdmin()) {
-            //Todo capire come gestire la creazione del controller con un utente non admin
-            throw new IllegalArgumentException("AdminController requires an admin user");
-        }
-        this.currentUser=currentUser;
+        // Non blocchiamo più la creazione del controller; i controlli di autorizzazione
+        // vengono effettuati all'inizio di ogni operazione tramite ensureAdmin().
+        this.currentUser = currentUser;
     }
     public AdminController(User currentUser, UserDAO userDAO) {
         Objects.requireNonNull(currentUser);
         this.userDAO = userDAO;
-        // Verifica che l'utente sia admin; se non lo è, blocchiamo la creazione del controller
-        if (!currentUser.isAdmin()) {
-            //Todo capire come gestire la creazione del controller con un utente non admin
-            throw new IllegalArgumentException("AdminController requires an admin user");
+        // Non blocchiamo più la creazione del controller; i controlli di autorizzazione
+        // vengono effettuati all'inizio di ogni operazione tramite ensureAdmin().
+        this.currentUser = currentUser;
+    }
+
+    // Metodo centralizzato per verificare i permessi admin
+    private void ensureAdmin() {
+        if (!this.currentUser.isAdmin()) {
+            throw new IllegalArgumentException("Accesso negato: operazione riservata agli admin");
         }
-        this.currentUser=currentUser;
     }
 
     public User searchUserById(int userId){
+        ensureAdmin();
         try{
             UserDAO userDAO = new UserDAO();
             User u = userDAO.getUserById(userId);
@@ -43,6 +45,7 @@ public class AdminController {
     }
 
     public void removeUser(int userId){
+        ensureAdmin();
         try{
             UserDAO userDAO = new UserDAO();
             userDAO.removeUser(userId);
@@ -52,6 +55,7 @@ public class AdminController {
     }
 
     public User searchUserByEmail(String email){
+        ensureAdmin();
         try{
             UserDAO userDAO = new UserDAO();
             User u = userDAO.getUserByEmail(email);
@@ -63,6 +67,7 @@ public class AdminController {
     }
 
     public List<User> allUsers(){
+        ensureAdmin();
         try{
             UserDAO userDAO = new UserDAO();
             List<User> users = userDAO.getAllUsers();
@@ -74,6 +79,7 @@ public class AdminController {
     }
 
     public List<Document> allDocuments(){
+        ensureAdmin();
         try{
             DocumentDAO documentDAO = new DocumentDAO();
             List<Document> docs = documentDAO.getAllDocuments();
@@ -85,6 +91,7 @@ public class AdminController {
     }
 
     public List<Document> documentsByAuthor(int userId){
+        ensureAdmin();
         try{
             DocumentDAO documentDAO = new DocumentDAO();
             List<Document> docs = documentDAO.getDocumentsByAuthor(userId);
@@ -96,6 +103,7 @@ public class AdminController {
     }
 
     public void setModerator(int userId, boolean isModerator){
+        ensureAdmin();
         try {
             UserDAO userDAO = new UserDAO();
             userDAO.setModerator(userId, isModerator);
@@ -108,6 +116,7 @@ public class AdminController {
         //Todo
     }
     public List<Document> documentsApprovedByModerator(int moderatorId){
+        ensureAdmin();
         try{
             UserDAO userDAO = new UserDAO();
             User moderatorUser = userDAO.getUserById(moderatorId);
@@ -127,6 +136,7 @@ public class AdminController {
     }
 
     public List<Document> documentsByStatus(DocumentStatus status) {
+        ensureAdmin();
         try{
             DocumentDAO documentDAO = new DocumentDAO();
             List<Document> docs = documentDAO.getDocumentsByStatus(status);
@@ -138,6 +148,7 @@ public class AdminController {
     }
 
     public List<Collection> allCollections(){
+        ensureAdmin();
         try{
             CollectionDAO collectionDAO = new CollectionDAO();
             List<Collection> cols = collectionDAO.getAllCollections();
@@ -149,6 +160,7 @@ public class AdminController {
     }
 
     public void deleteCollection(int collectionId){
+        ensureAdmin();
         try{
             CollectionDAO collectionDAO = new CollectionDAO();
             collectionDAO.deleteCollection(collectionId);
@@ -158,6 +170,7 @@ public class AdminController {
     }
 
     public List<Comment> getCommentByAuthor(int authorId){
+        ensureAdmin();
         try{
             CommentDAO commentDAO = new CommentDAO();
             List<Comment> comments = commentDAO.getCommentsByAuthor(authorId);
@@ -169,6 +182,7 @@ public class AdminController {
     }
 
     public List<Comment> getCommentsByDocument(int documentId){
+        ensureAdmin();
         try{
             CommentDAO commentDAO = new CommentDAO();
             List<Comment> comments = commentDAO.getCommentsByDocument(documentId);
