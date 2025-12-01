@@ -15,7 +15,7 @@ public class ModeratorController {
         this.currentUser = Objects.requireNonNull(currentUser, "currentUser cannot be null" );
     }
 
-    public void updateStatus( int docId, RequestStatus decision){
+    public void updateDocumentStatus(int docId, RequestStatus decision){
         PublishRequestDAO publishRequestDAO = new PublishRequestDAO();
         DocumentDAO documentDAO = new DocumentDAO();
         try{
@@ -23,10 +23,13 @@ public class ModeratorController {
                 throw new IllegalArgumentException("Current user is not moderator");
             if( decision == null || decision == RequestStatus.PENDING)
                 throw new IllegalArgumentException("Invalid decision");
-            List<PublishRequest> pendings = publishRequestDAO.getRequestsByStatus(RequestStatus.PENDING);
-            boolean hasPending = pendings.stream().anyMatch( r -> r.getDocument() != null && r.getDocument().getId() == docId);
-            if (!hasPending)
-                throw new IllegalArgumentException("No pending requests found for this document");
+            Document doc= documentDAO.getDocumentById(docId);
+            if(doc.getStatus() == DocumentStatus.DRAFT)
+                throw new IllegalArgumentException("Document is not under review");
+
+            PublishRequest req = publishRequestDAO.getPendingRequestByDocument(docId);
+            if(req == null)
+                throw new IllegalArgumentException("No PENDING request found for document id " + docId);
             publishRequestDAO.updateRequestStatus(docId, currentUser.getId(), decision);
             if(decision == RequestStatus.APPROVED)
                 documentDAO.updateDocumentStatus( docId, DocumentStatus.PUBLISHED);
@@ -37,7 +40,7 @@ public class ModeratorController {
         }
     }
 
-    public ArrayList<PublishRequest> viewPendingRequests(){
+    public ArrayList<PublishRequest> viewPendingDocumentRequests(){
         PublishRequestDAO publishRequestDAO = new PublishRequestDAO();
         try{
             if (!currentUser.isModerator() || !currentUser.isAdmin())
