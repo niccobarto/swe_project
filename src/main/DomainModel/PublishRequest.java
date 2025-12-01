@@ -9,14 +9,16 @@ public class PublishRequest {
     private Date dateRequest;
     private Date dateResult;
     private Document document;
+    private User moderator;
 
-    public PublishRequest(int id,String motivation, Date date_request, Date date_result, Document document) {
+    public PublishRequest(int id,String motivation, Date date_request, Date date_result, Document document, User moderator) {
         this.id=id;
         this.status = RequestStatus.PENDING;
         this.motivation = motivation;
         this.dateRequest = date_request;
         this.dateResult = date_result;
         this.document = document;
+        this.moderator = moderator;
 
     }
 
@@ -62,5 +64,14 @@ public class PublishRequest {
     public void setDate_result(Date date_result) {
         this.dateResult = date_result;
     }
+
+    public User getModerator() {
+        return moderator;
+    }
+
+    public void setModerator(User moderator) {
+        this.moderator = moderator;
+    }
+
 }
 

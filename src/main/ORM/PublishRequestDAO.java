@@ -1,8 +1,10 @@
 package ORM;
 
 import DomainModel.Document;
+import DomainModel.User;
 import DomainModel.PublishRequest;
 import DomainModel.RequestStatus;
+import DomainModel.DocumentStatus;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,6 +31,12 @@ public class PublishRequestDAO extends BaseDAO {
             ps.executeUpdate();
             ps.close();
 
+            String query2="UPDATE document SET status=? WHERE id=?";
+            PreparedStatement ps2=connection.prepareStatement(query2);
+            ps2.setString(1, DocumentStatus.PENDING.toString());
+            ps2.setInt(2,doc.getId());
+            ps2.executeUpdate();
+            ps2.close();
         }catch (SQLException e){
             LOGGER.log(Level.SEVERE, "Errore durante addRequest(docId=" + (doc!=null?doc.getId():null) + ")", e);
         }
@@ -110,7 +118,24 @@ public class PublishRequestDAO extends BaseDAO {
         }
         return publishRequests;
     }
-
+    public PublishRequest getPendingRequestByDocument(int documentId){
+        PublishRequest publishRequest=null;
+        try{
+            String query="SELECT * FROM publish_request WHERE document_id=? AND request_status=?";
+            PreparedStatement ps=connection.prepareStatement(query);
+            ps.setInt(1,documentId);
+            ps.setString(2,RequestStatus.PENDING.toString());
+            ResultSet rs=ps.executeQuery();
+            if(rs.next()){
+                publishRequest=createRequestFromResultSet(rs);
+            }
+            rs.close();
+            ps.close();
+        }catch (SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante getRequestById(documentId=" + documentId + ")", e);
+        }
+        return publishRequest;
+    }
 //-----private Methods-----
     private PublishRequest createRequestFromResultSet(ResultSet rs) throws SQLException {
         int id=rs.getInt("id");
@@ -118,7 +143,9 @@ public class PublishRequestDAO extends BaseDAO {
         Date dateRequest=rs.getDate("date_request");
         Date dateResult=rs.getDate("date_result");
         Document document=new DocumentDAO().getDocumentById(rs.getInt("document_id"));
-        PublishRequest pr=new PublishRequest(id,motivation,dateRequest,dateResult,document);
+        UserDAO userDAO=new UserDAO();
+        User m=userDAO.getUserById(rs.getInt("moderator_id"));
+        PublishRequest pr=new PublishRequest(id,motivation,dateRequest,dateResult,document,m);
         pr.setStatus(RequestStatus.valueOf(rs.getString("request_status")));
         return pr;
     }
