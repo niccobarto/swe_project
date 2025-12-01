@@ -79,21 +79,17 @@ public class TagChangeRequestDAO extends BaseDAO {
     //aggiorna stato e imposta date_result
     public void updateStatus(int requestId,int moderatorId, RequestStatus newStatus) {
         try{
-            String q1 = "INSERT INTO tag_change_request_managed " +
-                    "(tag_change_request_id, moderator_id) VALUES (?, ?)";
-            PreparedStatement ps1 = connection.prepareStatement(q1);
-            ps1.setInt(1, requestId);
-            ps1.setInt(2, moderatorId);
-            ps1.executeUpdate();
-            ps1.close();
+            String q = "UPDATE tag_change_request " +
+                    "SET status = ?, date_result = ?, moderator_id = ? " +
+                    "WHERE id = ?";
+            PreparedStatement ps = connection.prepareStatement(q);
+            ps.setString(1, newStatus.toString());
+            ps.setDate(2, new java.sql.Date(System.currentTimeMillis()));
+            ps.setInt(3, moderatorId);
+            ps.setInt(4, requestId);
 
-            String q2 = "UPDATE tag_change_request SET status = ?, date_result = ? WHERE id = ?";
-            PreparedStatement ps2 = connection.prepareStatement(q2);
-            ps2.setString(1, newStatus.toString());
-            ps2.setDate(2, new java.sql.Date(System.currentTimeMillis()));
-            ps2.setInt(3, requestId);
-            int affected = ps2.executeUpdate(); //quante righe modificate
-            ps2.close();
+            int affected = ps.executeUpdate();
+            ps.close();
 
             if (affected == 0)
                 LOGGER.log(Level.WARNING, "updateStatus affected 0 rows (requestId=" + requestId + ")");
@@ -154,6 +150,11 @@ public class TagChangeRequestDAO extends BaseDAO {
         r.setDocument(document);
         r.setExistingTagLabel(rs.getString("existing_tag_label"));
         r.setProposedLabel(rs.getString("proposed_label"));
+        int moderatorId = rs.getInt("moderator_id");
+        if (!rs.wasNull()) {
+            User moderator = new UserDAO().getUserById(moderatorId);
+            r.setModerator(moderator);
+        }
         return r;
     }
 
@@ -161,21 +162,15 @@ public class TagChangeRequestDAO extends BaseDAO {
         List<TagChangeRequest> requests = new ArrayList<>();
 
         try {
-            String q = "SELECT tag_change_request_id " +
-                    "FROM tag_change_request_managed " +
-                    "WHERE moderator_id = ?";
+            String q = "SELECT * FROM tag_change_request " +
+                    "WHERE moderator_id = ? " +
+                    "ORDER BY date_result DESC";
             PreparedStatement ps = connection.prepareStatement(q);
             ps.setInt(1, moderatorId);
             ResultSet rs = ps.executeQuery();
-
             while (rs.next()) {
-                int reqId = rs.getInt("tag_change_request_id");
-                TagChangeRequest r = getById(reqId);
-                if (r != null) {
-                    requests.add(r);
-                }
+                requests.add(map(rs));
             }
-
             rs.close();
             ps.close();
         } catch (SQLException e) {

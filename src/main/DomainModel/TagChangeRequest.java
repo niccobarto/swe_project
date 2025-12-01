@@ -1,7 +1,6 @@
 package DomainModel;
 
 import java.util.Date;
-
 public class TagChangeRequest {
 
     private Integer id;
@@ -12,6 +11,7 @@ public class TagChangeRequest {
     private TagChangeOperation operation;
     private String existingTagLabel; //tag già esistente, può essere null
     private String proposedLabel; //i tag saranno creati dopo l'accettazione per evitare tag non assegnati a nessuno
+    private User moderator;
 
     public TagChangeRequest() {}
 
@@ -105,4 +105,7 @@ public class TagChangeRequest {
 
     public String getExistingTagLabel() { return existingTagLabel; }
     public void setExistingTagLabel(String existingTagLabel) { this.existingTagLabel = existingTagLabel; }
+
+    public User getModerator(){ return moderator; }
+    public void setModerator(User moderator){ this.moderator = moderator; }
 }
