@@ -7,23 +7,13 @@ import java.util.Objects;
 
 public class LoginController {
 
-    private final UserDAO userDAO;
-
-    public LoginController(){
-        this.userDAO = new UserDAO();
-    }
-
-    public LoginController(UserDAO userDAO){
-        this.userDAO = userDAO;
-    }
-
     public User login(String email, String password) {
         try {
             if (email == null || email.isBlank())
                 throw new IllegalArgumentException("Email cannot be empty");
             if (password == null || password.isBlank())
                 throw new IllegalArgumentException("Password cannot be empty");
-
+            UserDAO userDAO = new UserDAO();
             User match = userDAO.getUserByEmail(email);
             if (match == null)
                 throw new IllegalArgumentException("User not found");
@@ -47,6 +37,7 @@ public class LoginController {
                 throw new IllegalArgumentException("Email cannot be empty");
             if (password == null || password.isBlank())
                 throw new IllegalArgumentException("Password cannot be empty");
+            UserDAO userDAO = new UserDAO();
 
             User existing = userDAO.getUserByEmail(email);
             if (existing != null){
@@ -66,6 +57,7 @@ public class LoginController {
         try {
             if (email == null || email.isBlank())
                 throw new IllegalArgumentException("Email cannot be empty");
+            UserDAO userDAO = new UserDAO();
             User existing = userDAO.getUserByEmail(email);
             return existing == null;
         } catch (Exception e) {
