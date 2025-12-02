@@ -19,11 +19,12 @@ public class DocumentRelationDAO extends BaseDAO {
     }
     public void addDocumentRelation(int sourceId,int destinationId,DocumentRelationType type,boolean confirmed){
         try{
-            String query="INSERT INTO document_relation (source_id,destination_id,relation_type) VALUES (?,?,?)";
+            String query="INSERT INTO document_relation (source_id,destination_id,relation_type,confirmed) VALUES (?,?,?,?)";
             PreparedStatement ps=connection.prepareStatement(query);
             ps.setInt(1,sourceId);
             ps.setInt(2,destinationId);
             ps.setString(3,type.toString());
+            ps.setBoolean(4,confirmed);
             ps.executeUpdate();
             ps.close();
         }catch(SQLException e){
@@ -59,10 +60,18 @@ public class DocumentRelationDAO extends BaseDAO {
     public List<DocumentRelation> getSourceRelationDocument(int documentId, DocumentRelationType type) {
         List<DocumentRelation> relations = new ArrayList<>();
         try {
-            String query = "SELECT * FROM document_relation WHERE source_id=? AND relation_type=?";
-            PreparedStatement ps = connection.prepareStatement(query);
-            ps.setInt(1, documentId);
-            ps.setString(2, type.toString());
+            String query;
+            PreparedStatement ps;
+            if (type == null) {
+                query = "SELECT * FROM document_relation WHERE source_id=?";
+                ps = connection.prepareStatement(query);
+                ps.setInt(1, documentId);
+            } else {
+                query = "SELECT * FROM document_relation WHERE source_id=? AND relation_type=?";
+                ps = connection.prepareStatement(query);
+                ps.setInt(1, documentId);
+                ps.setString(2, type.toString());
+            }
             var rs = ps.executeQuery();
             while (rs.next()) {
                 relations.add(createDocumentRelationFromResultSet(rs));
@@ -77,10 +86,18 @@ public class DocumentRelationDAO extends BaseDAO {
     public List<DocumentRelation> getDestinationRelationDocument(int documentId, DocumentRelationType type) {
         List<DocumentRelation> relations = new ArrayList<>();
         try {
-            String query = "SELECT * FROM document_relation WHERE destination_id=? AND relation_type=?";
-            PreparedStatement ps = connection.prepareStatement(query);
-            ps.setInt(1, documentId);
-            ps.setString(2, type.toString());
+            String query;
+            PreparedStatement ps;
+            if (type == null) {
+                query = "SELECT * FROM document_relation WHERE destination_id=?";
+                ps = connection.prepareStatement(query);
+                ps.setInt(1, documentId);
+            } else {
+                query = "SELECT * FROM document_relation WHERE destination_id=? AND relation_type=?";
+                ps = connection.prepareStatement(query);
+                ps.setInt(1, documentId);
+                ps.setString(2, type.toString());
+            }
             var rs = ps.executeQuery();
             while (rs.next()) {
                 relations.add(createDocumentRelationFromResultSet(rs));
@@ -147,7 +164,6 @@ public class DocumentRelationDAO extends BaseDAO {
         }
         return relations;
     }
-
     public List<DocumentRelation> getDestinationRelationsByConfirm(int documentId,boolean confirmed){
         List<DocumentRelation> relations = new ArrayList<>();
         try {
@@ -188,8 +204,8 @@ public class DocumentRelationDAO extends BaseDAO {
     }
     //----private methods----//
     private DocumentRelation createDocumentRelationFromResultSet(ResultSet rs) throws SQLException {
-        int sourceId = rs.getInt("source_document_id");
-        int destinationId = rs.getInt("destination_document_id");
+        int sourceId = rs.getInt("source_id");
+        int destinationId = rs.getInt("destination_id");
         Document source=new DocumentDAO().getDocumentById(sourceId);
         Document destination=new DocumentDAO().getDocumentById(destinationId);
         String relationType = rs.getString("relation_type");

@@ -20,21 +20,21 @@ public class RelationController {
 
     public Document getSelected() { return selected; }
 
-    public ArrayList<Document> searchDestinationRelations(DocumentRelationType type){
+    public List<DocumentRelation> searchSourceRelations(DocumentRelationType type){
+        DocumentRelationDAO relDAO = new DocumentRelationDAO();
+        try {
+            return relDAO.getSourceRelationDocument(selected.getId(), type);
+        } catch (Exception e) {
+            System.err.println("searchSourceRelations failed: selected=" + selected.getId() + ", type=" + type);
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    public List<DocumentRelation> searchDestinationRelations(DocumentRelationType type){
         DocumentRelationDAO relDAO = new DocumentRelationDAO();
         try{
-            List<DocumentRelation> all = relDAO.getAllDestinationRelationDocument(selected.getId());
-            if (all == null) all = List.of(); //lista vuota immutabile per evitare eccezione null se DAO dovesse restituire null
-
-            List <Document> dests= all.stream()
-                    .filter(r -> r.getSource() != null && r.getSource().getId() == selected.getId())
-                    .filter(r -> type == null || r.getRelationType() == type)
-                    .map(DocumentRelation::getDestination)
-                    .filter(Objects::nonNull)
-                    .toList();
-
-            return new ArrayList<>(dests);
-
+            return relDAO.getDestinationRelationDocument(selected.getId(),type);
         }catch (Exception e){
             System.err.println("searchDestinationRelations failed: selected=" + selected.getId() + ", type=" + type);
             e.printStackTrace();
@@ -73,27 +73,6 @@ public class RelationController {
         }
     }
 
-    public ArrayList<Document> searchSourceRelations(DocumentRelationType type){
-        DocumentRelationDAO relDAO = new DocumentRelationDAO();
-        try {
-            List<DocumentRelation> all = relDAO.getAllSourceRelationDocument(selected.getId());
-            if (all == null) all = List.of();
-
-            List<Document> sources = all.stream()
-                    .filter(r -> r.getDestination() != null && r.getDestination().getId() == selected.getId())
-                    .filter(r -> type == null || r.getRelationType() == type)
-                    .map(DocumentRelation::getSource)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-
-            return new ArrayList<>(sources);
-        } catch (Exception e) {
-            System.err.println("searchSourceRelations failed: selected=" + selected.getId() + ", type=" + type);
-            e.printStackTrace();
-            return new ArrayList<>();
-        }
-    }
-
     public void updateRelationType(Document destination, DocumentRelationType new_type){
         DocumentRelationDAO relDAO = new DocumentRelationDAO();
         try{
@@ -112,12 +91,10 @@ public class RelationController {
         }
     }
 
-    public ArrayList<DocumentRelation> searchDestinationRelationsByConfirm(boolean confirmed){
+    public List<DocumentRelation> searchDestinationRelationsByConfirm(boolean confirmed){
         DocumentRelationDAO relDAO = new DocumentRelationDAO();
         try{
-            List<DocumentRelation> relations = relDAO.getDestinationRelationsByConfirm(selected.getId(), confirmed);
-            return (ArrayList<DocumentRelation>) relations;
-
+            return relDAO.getDestinationRelationsByConfirm(selected.getId(), confirmed);
         } catch (Exception e) {
             System.err.println("searchDestinationRelationsByConfirm failed: selected=" + selected.getId() + ", isConfirmed=" + confirmed);
             e.printStackTrace();
