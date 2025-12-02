@@ -51,7 +51,7 @@ public class RelationController {
                 throw new IllegalArgumentException("Source and Destination documents are the same");
             if(type == null)
                 throw new IllegalArgumentException("Relation type is null");
-            relDAO.addDocumentRelation(selected.getId(), destination.getId(), type);
+            relDAO.addDocumentRelation(selected.getId(), destination.getId(), type, selected.getAuthor().getId() == destination.getAuthor().getId());
         }catch (Exception e){
             System.err.println("addRelation failed: source=" + selected.getId() +
                     ", destination=" + (destination != null ? destination.getId() : "null") +
@@ -94,4 +94,48 @@ public class RelationController {
         }
     }
 
+    public void updateRelationType(Document destination, DocumentRelationType new_type){
+        DocumentRelationDAO relDAO = new DocumentRelationDAO();
+        try{
+            if(destination == null)
+                throw new IllegalArgumentException("Source or Destination document is null");
+            if(selected.getId() == destination.getId())
+                throw new IllegalArgumentException("Source and Destination documents are the same");
+            if(new_type == null)
+                throw new IllegalArgumentException("Relation type is null");
+            relDAO.updateDocumentRelation(selected.getId(), destination.getId(), new_type);
+        }catch (Exception e){
+            System.err.println("updateRelation failed: source=" + selected.getId() +
+                    ", destination=" + (destination != null ? destination.getId() : "null") +
+                    ", new_type=" + new_type);
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<DocumentRelation> searchDestinationRelationsByConfirm(boolean confirmed){
+        DocumentRelationDAO relDAO = new DocumentRelationDAO();
+        try{
+            List<DocumentRelation> relations = relDAO.getDestinationRelationsByConfirm(selected.getId(), confirmed);
+            return (ArrayList<DocumentRelation>) relations;
+
+        } catch (Exception e) {
+            System.err.println("searchDestinationRelationsByConfirm failed: selected=" + selected.getId() + ", isConfirmed=" + confirmed);
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    public void setRelationConfirmed(Document source, boolean confirmed) {
+        DocumentRelationDAO relDAO = new DocumentRelationDAO();
+        try {
+            if (source == null)
+                throw new IllegalArgumentException("Source or Destination document is null");
+            relDAO.setRelationConfirmed(source.getId(), selected.getId(), confirmed);
+        } catch (Exception e) {
+            System.err.println("setRelationConfirmed failed: source=" + (source != null ? source.getId() : "null") +
+                    ", destination=" + selected.getId() +
+                    ", confirmed=" + confirmed);
+            e.printStackTrace();
+        }
+    }
 }
