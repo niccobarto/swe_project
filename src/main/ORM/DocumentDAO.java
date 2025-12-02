@@ -150,25 +150,6 @@ public class DocumentDAO extends BaseDAO {
             LOGGER.log(Level.SEVERE, "Errore durante updateDocumentStatus(id=" + docId + ")", e);
         }
     }
-    private Document createDocumentFromResultSet(ResultSet rs) throws SQLException {
-        int id = rs.getInt("id");
-        String title = rs.getString("title");
-        String description = rs.getString("description");
-        String statusStr = rs.getString("status");
-        String fileFormat = rs.getString("file_format");
-        int authorId = rs.getInt("author_id");
-        String filePath = rs.getString("file_path");
-        String fileName = rs.getString("file_name");
-        Date creationDate = rs.getDate("creation_date");
-        String period = rs.getString("period");
-
-        DocumentStatus status = statusStr != null ? DocumentStatus.valueOf(statusStr) : DocumentStatus.DRAFT;
-        User author = new UserDAO().getUserById(authorId);
-        Document document = new Document(id, title ,description, DocumentFormat.valueOf(fileFormat), author, filePath, fileName, creationDate,period);
-        document.setStatus(status);
-        document.setTags(getTagsForDocument(id));
-        return document;
-    }
 
     private List<Tag> getTagsForDocument(int documentId) {
         List<Tag> tags = new ArrayList<>();
@@ -309,6 +290,26 @@ public class DocumentDAO extends BaseDAO {
             LOGGER.log(Level.SEVERE, "Errore durante searchDocuments()", e);
         }
         return documents;
+    }
+
+    private Document createDocumentFromResultSet(ResultSet rs) throws SQLException {
+        int id = rs.getInt("id");
+        String title = rs.getString("title");
+        String description = rs.getString("description");
+        String statusStr = rs.getString("status");
+        String fileFormat = rs.getString("file_format");
+        int authorId = rs.getInt("author_id");
+        String filePath = rs.getString("file_path");
+        String fileName = rs.getString("file_name");
+        Date creationDate = rs.getDate("creation_date");
+        String period = rs.getString("period");
+
+        DocumentStatus status = statusStr != null ? DocumentStatus.valueOf(statusStr) : DocumentStatus.DRAFT;
+        User author = new UserDAO().getUserById(authorId);
+        Document document = new Document(id, title ,description, DocumentFormat.valueOf(fileFormat), author, filePath, fileName, creationDate,period);
+        document.setStatus(status);
+        document.setTags(getTagsForDocument(id));
+        return document;
     }
 
 }
