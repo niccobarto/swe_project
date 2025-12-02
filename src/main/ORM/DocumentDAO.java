@@ -269,7 +269,7 @@ public class DocumentDAO extends BaseDAO {
             }
             if (criteria.getTags().isPresent()) {
                 for (String tag : criteria.getTags().get()) {
-                    queryBuilder.append(" AND EXISTS (SELECT 1 FROM DocumentTags dt WHERE dt.document_id = document.id AND dt.tag_label = ?)");
+                    queryBuilder.append(" AND EXISTS (SELECT 1 FROM document_tags dt WHERE dt.document_id = document.id AND dt.tag_label = ?)");
                     parameters.add(tag);
                 }
             }
