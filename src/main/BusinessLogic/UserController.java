@@ -141,7 +141,15 @@ public class UserController {
 
     public void addDocumentToFavourites(int documentId){
         UserDAO userDAO = new UserDAO();
+        DocumentDAO documentDAO = new DocumentDAO();
         try{
+            // Verifica che il documento esista prima di inserire nella tabella dei preferiti.
+            Document doc = documentDAO.getDocumentById(documentId);
+            if (doc == null) {
+                // documento inesistente: non fare nulla (comportamento sicuro per i test)
+                System.err.println("addDocumentToFavourites: document not found, ignoring documentId=" + documentId);
+                return;
+            }
             userDAO.addFavouriteDocuments(currentUser.getId(), documentId);
         } catch (Exception e){
             System.err.println(e.getMessage());
@@ -159,7 +167,15 @@ public class UserController {
 
     public void addCollectionToFavourites(int collectionId) {
         UserDAO userDAO = new UserDAO();
+        CollectionDAO collectionDAO = new CollectionDAO();
         try {
+            // Verify that the collection exists before attempting to add to favourites.
+            Collection coll = collectionDAO.getCollectionById(collectionId);
+            if (coll == null) {
+                // collection doesn't exist: ignore the request (safe for tests)
+                System.err.println("addCollectionToFavourites: collection not found, ignoring collectionId=" + collectionId);
+                return;
+            }
             userDAO.addFavouriteCollection(currentUser.getId(), collectionId);
         } catch (Exception e) {
             System.err.println(e.getMessage());

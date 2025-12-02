@@ -82,7 +82,7 @@ public class CollectionDAO extends BaseDAO {
     public List<Collection> getCollectionsByUser(int userId){
         List<Collection> collections = new ArrayList<Collection>();
         try {
-            String query="SELECT * FROM collection WHERE user_id=?";
+            String query="SELECT * FROM collection WHERE user_id=? ORDER BY id DESC";
             PreparedStatement ps=connection.prepareStatement(query);
             ps.setInt(1,userId);
             ResultSet rs=ps.executeQuery();
@@ -134,7 +134,7 @@ public class CollectionDAO extends BaseDAO {
     public Collection getCollectionById(int collectionId){
         Collection c=null;
         try{
-            String query="SELECT * FROM collection WHERE collection_id=?";
+            String query="SELECT * FROM collection WHERE id=?";
             PreparedStatement ps=connection.prepareStatement(query);
             ps.setInt(1,collectionId);
             ResultSet rs=ps.executeQuery();

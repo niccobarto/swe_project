@@ -210,7 +210,7 @@ public class DocumentDAO extends BaseDAO {
     public List<Document> getDocumentsByAuthor(int userId){
         List<Document> documents = new ArrayList<>();
         try {
-            String query = "SELECT * FROM document WHERE author_id = ? ORDER BY creation_date DESC";
+            String query = "SELECT * FROM document WHERE author_id = ? ORDER BY creation_date DESC, id DESC";
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setInt(1, userId);
             ResultSet rs = ps.executeQuery();
@@ -228,7 +228,7 @@ public class DocumentDAO extends BaseDAO {
     public List<Document> getAllDocuments(){
         List<Document> documents = new ArrayList<>();
         try {
-            String query = "SELECT * FROM document ORDER BY creation_date DESC";
+            String query = "SELECT * FROM document ORDER BY creation_date DESC, id DESC";
             PreparedStatement stmt = connection.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
             while(rs.next()){
@@ -245,7 +245,7 @@ public class DocumentDAO extends BaseDAO {
     public List<Document> getDocumentsByStatus(DocumentStatus status){
         List<Document> documents = new ArrayList<>();
         try {
-            String query = "SELECT * FROM document WHERE status = ? ORDER BY creation_date DESC";
+            String query = "SELECT * FROM document WHERE status = ? ORDER BY creation_date DESC, id DESC";
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setString(1, status.toString());
             ResultSet rs = ps.executeQuery();
@@ -292,6 +292,8 @@ public class DocumentDAO extends BaseDAO {
                     parameters.add(tag);
                 }
             }
+            // deterministic ordering: newest first, tie-breaker by id
+            queryBuilder.append(" ORDER BY creation_date DESC, id DESC");
             PreparedStatement ps = connection.prepareStatement(queryBuilder.toString());
             for (int i = 0; i < parameters.size(); i++) {
                 ps.setObject(i + 1, parameters.get(i));

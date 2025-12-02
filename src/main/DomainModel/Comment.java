@@ -24,4 +24,21 @@ public class Comment {
     public void setId(int id) {
         this.id = id;
     }
+
+    // New getters to support tests and consumers
+    public User getCommentAuthor() {
+        return commentAuthor;
+    }
+
+    public Document getDocument() {
+        return document;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public Date getDate() {
+        return date;
+    }
 }
