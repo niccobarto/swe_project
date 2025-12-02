@@ -69,108 +69,110 @@ class AdminControllerTest {
     }
 
     @Test
-    void searchUserById_positive_and_negative_and_auth() {
-        // positivo
+    void searchUserById() {
+        // Caso positivo: utente esistente deve essere trovato
         User found = adminController.searchUserById(normalUser.getId());
         assertNotNull(found);
         assertEquals(normalUser.getEmail(), found.getEmail());
-        // negativo: id inesistente
+        // Caso negativo: id inesistente deve restituire null
         assertNull(adminController.searchUserById(Integer.MAX_VALUE));
-        // accesso negato
+        // Caso autorizzazione: se chi invoca non è admin viene sollevata IllegalArgumentException
         AdminController nonAdmin = new AdminController(normalUser);
         assertThrows(IllegalArgumentException.class, () -> nonAdmin.searchUserById(normalUser.getId()));
     }
 
     @Test
-    void removeUser_positive_and_negative_and_auth() {
-        // positivo
+    void removeUser() {
+        // Caso positivo: admin rimuove utente
         adminController.removeUser(normalUser.getId());
         assertNull(userDAO.getUserById(normalUser.getId()));
-        // negativo: id inesistente
+        // Caso negativo: id inesistente non deve lanciare eccezioni
         assertDoesNotThrow(() -> adminController.removeUser(Integer.MAX_VALUE));
-        // accesso negato
+        // Caso autorizzazione: utente non admin non può rimuovere admin
         AdminController nonAdmin = new AdminController(normalUser);
         assertThrows(IllegalArgumentException.class, () -> nonAdmin.removeUser(adminUser.getId()));
     }
 
     @Test
-    void searchUserByEmail_positive_and_negative_and_auth() {
-        // positivo
+    void searchUserByEmail() {
+        // Positivo: trova l'utente per email
         User u = adminController.searchUserByEmail(normalUser.getEmail());
         assertNotNull(u);
         assertEquals(normalUser.getId(), u.getId());
-        // negativo: email inesistente
+        // Negativo: email inesistente -> null
         assertNull(adminController.searchUserByEmail("nope+" + System.currentTimeMillis() + "@x"));
-        // accesso negato
+        // Accesso negato: non-admin non può eseguire la ricerca
         AdminController nonAdmin = new AdminController(normalUser);
         assertThrows(IllegalArgumentException.class, () -> nonAdmin.searchUserByEmail(normalUser.getEmail()));
     }
 
     @Test
-    void allUsers_positive_and_auth() {
+    void allUsers() {
+        // Positivo: l'admin ottiene la lista di utenti
         List<User> users = adminController.allUsers();
         assertNotNull(users);
         assertTrue(users.size() >= 2);
-        // accesso negato
+        // Accesso negato: non-admin non deve poter chiamare il metodo
         AdminController nonAdmin = new AdminController(normalUser);
         assertThrows(IllegalArgumentException.class, nonAdmin::allUsers);
     }
 
     @Test
-    void allDocuments_positive_and_auth() {
-        // setup: crea un documento per normalUser direttamente via DAO
+    void allDocuments() {
+        // Setup: crea un documento per normalUser direttamente via DAO
         documentDAO.addDocument(normalUser, "A", "d", "1900", DocumentFormat.PDF, "fp", "fname", List.of("t"));
+        // Positivo: admin ottiene tutti i documenti
         List<Document> docs = adminController.allDocuments();
         assertNotNull(docs);
         assertFalse(docs.isEmpty());
-        // accesso negato
+        // Accesso negato: non-admin non può ottenere tutti i documenti
         AdminController nonAdmin = new AdminController(normalUser);
         assertThrows(IllegalArgumentException.class, nonAdmin::allDocuments);
     }
 
     @Test
-    void documentsByAuthor_positive_and_negative_and_auth() {
-        // setup: crea due documenti per normalUser
+    void documentsByAuthor() {
+        // Setup: crea due documenti per normalUser
         documentDAO.addDocument(normalUser, "A1", "d", "1900", DocumentFormat.TXT, "fp", "f1", List.of("t"));
         documentDAO.addDocument(normalUser, "A2", "d", "1901", DocumentFormat.PDF, "fp", "f2", List.of("t"));
-        // positivo
+        // Positivo: trova i documenti dell'autore
         List<Document> docs = adminController.documentsByAuthor(normalUser.getId());
         assertNotNull(docs);
         assertTrue(docs.size() >= 2);
-        // negativo: autore inesistente
+        // Negativo: autore inesistente -> lista vuota
         List<Document> none = adminController.documentsByAuthor(Integer.MAX_VALUE);
         assertNotNull(none);
-        // accesso negato
+        // Accesso negato
         AdminController nonAdmin = new AdminController(normalUser);
         assertThrows(IllegalArgumentException.class, () -> nonAdmin.documentsByAuthor(normalUser.getId()));
     }
 
     @Test
-    void setModerator_positive_and_negative_and_auth() {
-        // positivo
+    void setModerator() {
+        // Positivo: setta il flag moderator su true
         adminController.setModerator(normalUser.getId(), true);
         User updated = userDAO.getUserById(normalUser.getId());
         assertTrue(updated.isModerator());
-        // negativo: id inesistente
+        // Negativo: id inesistente non deve lanciare eccezioni
         assertDoesNotThrow(() -> adminController.setModerator(Integer.MAX_VALUE, true));
-        // accesso negato
+        // Accesso negato
         AdminController nonAdmin = new AdminController(normalUser);
         assertThrows(IllegalArgumentException.class, () -> nonAdmin.setModerator(adminUser.getId(), false));
     }
 
     @Test
-    void removeComment_positive_and_negative_and_auth() {
-        // setup: inserisci doc+comment direttamente via DAO
+    void removeComment() {
+        // Setup: inserisci doc+comment direttamente via DAO
         documentDAO.addDocument(normalUser, "C", "d", "2000", DocumentFormat.PDF, "fp", "fn", List.of("t"));
         int docId = documentDAO.getDocumentsByAuthor(normalUser.getId()).get(0).getId();
         commentDAO.addComment("Hi", normalUser.getId(), docId);
         int commentId = commentDAO.getCommentsByDocument(docId).get(0).getId();
-        // positivo: rimuovi commento
+        // Positivo: admin rimuove commento
         adminController.removeComment(commentId);
         assertTrue(commentDAO.getCommentsByDocument(docId).isEmpty());
-        // negativo: id inesistente
+        // Negativo: id inesistente non deve lanciare eccezioni
         assertDoesNotThrow(() -> adminController.removeComment(Integer.MAX_VALUE));
-        // accesso negato
+        // Accesso negato: non-admin non può rimuovere commenti
         AdminController nonAdmin = new AdminController(normalUser);
         // ricrea un commento per testare accesso negato
         commentDAO.addComment("Hi2", normalUser.getId(), docId);
@@ -179,43 +181,43 @@ class AdminControllerTest {
     }
 
     @Test
-    void documentsApprovedByModerator_positive_and_negative_and_auth() {
+    void documentsApprovedByModerator() {
         // setup: crea doc e publish request APPROVED direttamente via DAO
         documentDAO.addDocument(normalUser, "P", "d", "2000", DocumentFormat.PDF, "fp", "fn", List.of("t"));
         int docId = documentDAO.getDocumentsByAuthor(normalUser.getId()).get(0).getId();
         publishRequestDAO.addRequest(documentDAO.getDocumentById(docId));
         publishRequestDAO.updateRequestStatus(docId, adminUser.getId(), RequestStatus.APPROVED);
-        // positivo: lista contiene il doc approvato del moderator specificato (adminUser)
+        // Positivo: lista contiene il doc approvato del moderator specificato (adminUser)
         List<Document> approved = adminController.documentsApprovedByModerator(adminUser.getId());
         assertTrue(approved.stream().anyMatch(d -> d.getId() == docId));
-        // negativo: moderator inesistente
+        // Negativo: moderator inesistente -> lista vuota
         List<Document> none = adminController.documentsApprovedByModerator(Integer.MAX_VALUE);
         assertNotNull(none);
-        // accesso negato
+        // Accesso negato
         AdminController nonAdmin = new AdminController(normalUser);
         assertThrows(IllegalArgumentException.class, () -> nonAdmin.documentsApprovedByModerator(adminUser.getId()));
     }
 
     @Test
-    void documentsByStatus_positive_and_negative_and_auth() {
+    void documentsByStatus() {
         // setup: due doc, uno PENDING e uno DRAFT
         documentDAO.addDocument(normalUser, "S1", "d", "2000", DocumentFormat.PDF, "fp", "f1", List.of("t"));
         int d1 = documentDAO.getDocumentsByAuthor(normalUser.getId()).get(0).getId();
         documentDAO.updateDocumentStatus(d1, DocumentStatus.PENDING);
         documentDAO.addDocument(normalUser, "S2", "d2", "2001", DocumentFormat.TXT, "fp", "f2", List.of("t"));
-        // positivo: trova almeno S1
+        // Positivo: trova almeno S1
         List<Document> pending = adminController.documentsByStatus(DocumentStatus.PENDING);
         assertTrue(pending.stream().anyMatch(d -> d.getId() == d1));
-        // negativo: status senza doc (es. REJECTED)
+        // Negativo: status senza doc (es. REJECTED)
         List<Document> rejected = adminController.documentsByStatus(DocumentStatus.REJECTED);
         assertNotNull(rejected);
-        // accesso negato
+        // Accesso negato
         AdminController nonAdmin = new AdminController(normalUser);
         assertThrows(IllegalArgumentException.class, () -> nonAdmin.documentsByStatus(DocumentStatus.PENDING));
     }
 
     @Test
-    void allCollections_positive_and_auth() {
+    void allCollections() {
         // setup: crea una collection direttamente via DAO
         collectionDAO.addCollection("CAll", "desc", normalUser);
         List<Collection> cols = adminController.allCollections();
@@ -227,7 +229,7 @@ class AdminControllerTest {
     }
 
     @Test
-    void deleteCollection_positive_and_negative_and_auth() {
+    void deleteCollection() {
         // setup: crea collection
         collectionDAO.addCollection("CDel", "desc", normalUser);
         int colId = collectionDAO.getCollectionsByUser(normalUser.getId()).get(0).getId();
@@ -244,7 +246,7 @@ class AdminControllerTest {
     }
 
     @Test
-    void getCommentByAuthor_positive_and_negative_and_auth() {
+    void getCommentByAuthor() {
         // setup: commento su doc
         documentDAO.addDocument(normalUser, "GC", "d", "2000", DocumentFormat.PDF, "fp", "fn", List.of("t"));
         int docId = documentDAO.getDocumentsByAuthor(normalUser.getId()).get(0).getId();
@@ -261,7 +263,7 @@ class AdminControllerTest {
     }
 
     @Test
-    void getCommentsByDocument_positive_and_negative_and_auth() {
+    void getCommentsByDocument() {
         // setup: commento su doc
         documentDAO.addDocument(normalUser, "GCD", "d", "2000", DocumentFormat.PDF, "fp", "fn", List.of("t"));
         int docId = documentDAO.getDocumentsByAuthor(normalUser.getId()).get(0).getId();

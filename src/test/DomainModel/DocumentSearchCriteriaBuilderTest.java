@@ -12,7 +12,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DocumentSearchCriteriaBuilderTest {
 
     @Test
-    void build_withAllFields_shouldPopulateCriteria() {
+    // Verifica che, quando si impostano tutti i campi, il criterio risultante contenga
+    // i valori corrispondenti e che venga fatta una copia difensiva della lista dei tag.
+    void buildAllFields() {
         Date after = new Date(1000L);
         Date before = new Date(2000L);
         List<String> tags = new ArrayList<>(Arrays.asList("tag1", "tag2"));
@@ -51,7 +53,8 @@ public class DocumentSearchCriteriaBuilderTest {
     }
 
     @Test
-    void build_withNoFields_shouldReturnEmptyOptionals() {
+    // Verifica che, se non si impostano campi, il criterio restituisca Optionals vuoti
+    void buildNoFields() {
         DocumentSearchCriteria criteria = DocumentSearchCriteriaBuilder.getInstance()
                 .build();
 
@@ -64,7 +67,8 @@ public class DocumentSearchCriteriaBuilderTest {
     }
 
     @Test
-    void setTags_withNull_shouldKeepTagsNull() {
+    // Verifica che impostare tags a null mantenga l'optional dei tag vuoto
+    void setTagsNull() {
         DocumentSearchCriteria criteria = DocumentSearchCriteriaBuilder.getInstance()
                 .setTags(null)
                 .build();
@@ -72,4 +76,3 @@ public class DocumentSearchCriteriaBuilderTest {
         assertFalse(criteria.getTags().isPresent());
     }
 }
-

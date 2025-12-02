@@ -84,7 +84,7 @@ class ModeratorControllerTest {
 
         // NEGATIVO: documento senza richiesta pendente -> non cambia lo status
         documentDAO.addDocument(normalUser, "NoPending", "d", "2001", DocumentFormat.TXT, "fp", "fn2", List.of("t"));
-        int docNoPending = documentDAO.getDocumentsByAuthor(normalUser.getId()).get(1).getId();
+        int docNoPending = documentDAO.getDocumentsByAuthor(normalUser.getId()).get(0).getId();
         // non aggiungiamo publishRequest
         moderatorController.updateDocumentStatus(docNoPending, RequestStatus.APPROVED);
         Document notChanged = documentDAO.getDocumentById(docNoPending);
@@ -95,7 +95,7 @@ class ModeratorControllerTest {
         ModeratorController nonMod = new ModeratorController(normalUser);
         // crea doc+request per testare l'accesso negato
         documentDAO.addDocument(normalUser, "AuthTest", "d", "2002", DocumentFormat.PDF, "fp", "fn3", List.of("t"));
-        int docAuth = documentDAO.getDocumentsByAuthor(normalUser.getId()).get(2).getId();
+        int docAuth = documentDAO.getDocumentsByAuthor(normalUser.getId()).get(0).getId();
         publishRequestDAO.addRequest(documentDAO.getDocumentById(docAuth));
         nonMod.updateDocumentStatus(docAuth, RequestStatus.REJECTED);
 

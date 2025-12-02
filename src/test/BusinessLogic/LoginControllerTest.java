@@ -60,37 +60,48 @@ public class LoginControllerTest {
         DBConnection.resetInstance();
     }
 
+    /*
+     * login
+     * - caso: credenziali corrette -> ritorna utente
+     * - caso: password errata -> ritorna null
+     * - caso: utente inesistente -> ritorna null
+     */
     @Test
-    void loginWithCorrectCredentials_returnsUser() {
+    void login() {
+        // credenziali corrette
         User u = controller.login("test@example.com", "pwd123");
         assertNotNull(u, "Login con credenziali corrette dovrebbe restituire un utente");
         assertEquals("test@example.com", u.getEmail());
+
+        // password errata
+        User u2 = controller.login("test@example.com", "wrongpwd");
+        assertNull(u2, "Login con password errata dovrebbe restituire null");
+
+        // utente inesistente
+        User u3 = controller.login("nonexistent@example.com", "whatever");
+        assertNull(u3, "Login per utente inesistente dovrebbe restituire null");
     }
 
+    /*
+     * register
+     * - caso: registra nuovo utente e lo ritorna
+     */
     @Test
-    void loginWithWrongPassword_returnsNull() {
-        User u = controller.login("test@example.com", "wrongpwd");
-        assertNull(u, "Login con password errata dovrebbe restituire null");
-    }
-
-    @Test
-    void loginNonExistentUser_returnsNull() {
-        User u = controller.login("nonexistent@example.com", "whatever");
-        assertNull(u, "Login per utente inesistente dovrebbe restituire null");
-    }
-
-    @Test
-    void registerNewUser_createsAndReturnsUser() {
+    void register() {
         String email = "newuser@example.com";
         User created = controller.register("New", "User", email, "pass", false, false);
         assertNotNull(created, "Registrazione valida dovrebbe restituire l'utente creato");
         assertEquals(email, created.getEmail());
     }
 
+    /*
+     * emailAvailable
+     * - caso: email già presente -> false
+     * - caso: email libera -> true
+     */
     @Test
-    void isEmailAvailable_behaviour() {
+    void emailAvailable() {
         assertFalse(controller.isEmailAvailable("test@example.com"));
         assertTrue(controller.isEmailAvailable("available@example.com"));
     }
 }
-

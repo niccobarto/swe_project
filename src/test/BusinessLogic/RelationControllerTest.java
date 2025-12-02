@@ -55,9 +55,12 @@ class RelationControllerTest {
         }
     }
 
+    /*
+     * selected
+     * - verifica che getSelected ritorni il documento passato al controller
+     */
     @Test
-    void getSelected() {
-        // crea un documento e verifica che getSelected ritorni lo stesso
+    void selected() {
         UserController uc = new UserController(currentUser);
         uc.createDocument("SelDoc", "d", "1900", DocumentFormat.TXT, java.util.List.of("t"));
         List<Document> docs = documentDAO.getDocumentsByAuthor(currentUser.getId());
@@ -67,6 +70,12 @@ class RelationControllerTest {
         assertEquals(selected.getId(), rc.getSelected().getId());
     }
 
+    /*
+     * addRelation
+     * - caso: inserimento valido crea la relazione
+     * - caso: input invalidi (null, stesso doc, tipo null) non devono lanciare eccezioni
+     * - caso: chiamate invalide non devono duplicare record
+     */
     @Test
     void addRelation() {
         UserController uc = new UserController(currentUser);
@@ -74,7 +83,7 @@ class RelationControllerTest {
         uc.createDocument("DstDoc", "d", "1900", DocumentFormat.PDF, java.util.List.of("t"));
         List<Document> docs = documentDAO.getDocumentsByAuthor(currentUser.getId());
         assertTrue(docs.size() >= 2);
-        Document src = docs.get(1); // creation_date DESC -> last created is at index 0, take index 1 for source
+        Document src = docs.get(1);
         Document dst = docs.get(0);
 
         RelationController rc = new RelationController(src);
@@ -87,16 +96,21 @@ class RelationControllerTest {
         int after = countRelationRows(src.getId(), dst.getId(), DocumentRelationType.QUOTE);
         assertEquals(1, after, "Relation not inserted in DB");
 
-        // chiamate con input invalidi non devono lanciare eccezioni verso l'esterno
+        // input invalidi: non devono lanciare eccezioni
         assertDoesNotThrow(() -> rc.addRelation(null, DocumentRelationType.QUOTE));
         assertDoesNotThrow(() -> rc.addRelation(src, DocumentRelationType.QUOTE)); // same doc
         assertDoesNotThrow(() -> rc.addRelation(dst, null));
 
-        // Verifichiamo che gli input invalidi non abbiano alterato il DB (deve rimanere 1)
+        // verifico che gli input invalidi non abbiano creato duplicati
         int afterInvalidCalls = countRelationRows(src.getId(), dst.getId(), DocumentRelationType.QUOTE);
         assertEquals(1, afterInvalidCalls, "Invalid calls should not have inserted additional rows");
     }
 
+    /*
+     * removeRelation
+     * - caso: rimozione valida elimina la relazione
+     * - caso: input invalidi non devono lanciare eccezioni né modificare il DB
+     */
     @Test
     void removeRelation() {
         UserController uc = new UserController(currentUser);
@@ -125,8 +139,13 @@ class RelationControllerTest {
         assertEquals(0, afterInvalid, "Invalid remove should not change DB");
     }
 
+    /*
+     * searchDestination
+     * - caso: ricerca destinazioni (con e senza filtro tipo)
+     * - verifica che la relazione inserita sia restituita correttamente
+     */
     @Test
-    void searchDestinationRelations() {
+    void searchDestination() {
         UserController uc = new UserController(currentUser);
         uc.createDocument("Ssrc", "d", "1900", DocumentFormat.TXT, java.util.List.of("t"));
         uc.createDocument("Sdst", "d", "1900", DocumentFormat.TXT, java.util.List.of("t"));
@@ -160,8 +179,13 @@ class RelationControllerTest {
         assertEquals(1, count);
     }
 
+    /*
+     * searchSource
+     * - caso: ricerca sorgenti (con e senza filtro tipo)
+     * - verifica che la relazione inserita sia restituita correttamente
+     */
     @Test
-    void searchSourceRelations() {
+    void searchSource() {
         UserController uc = new UserController(currentUser);
         uc.createDocument("S2src", "d", "1900", DocumentFormat.TXT, java.util.List.of("t"));
         uc.createDocument("S2dst", "d", "1900", DocumentFormat.TXT, java.util.List.of("t"));
@@ -188,8 +212,13 @@ class RelationControllerTest {
         assertEquals(1, count);
     }
 
+    /*
+     * updateType
+     * - caso: aggiorna il tipo di relazione esistente
+     * - caso: input invalidi non devono lanciare eccezioni né alterare il DB
+     */
     @Test
-    void updateRelationTypeAndInvalidInputs() {
+    void updateType() {
         UserController uc = new UserController(currentUser);
         uc.createDocument("Usrc", "d", "1900", DocumentFormat.TXT, java.util.List.of("t"));
         uc.createDocument("Udst", "d", "1900", DocumentFormat.TXT, java.util.List.of("t"));
@@ -219,8 +248,14 @@ class RelationControllerTest {
         assertEquals(1, countRelationRows(src.getId(), dst.getId(), DocumentRelationType.NEW_VERSION_OF));
     }
 
+    /*
+     * setConfirmed
+     * - caso: impostare confirmed=true aggiorna la relazione
+     * - caso: impostare confirmed=false rimuove la relazione
+     * - caso: input null non deve lanciare eccezioni
+     */
     @Test
-    void setRelationConfirmedAndSearchByConfirm() {
+    void setConfirmed() {
         UserController uc = new UserController(currentUser);
         uc.createDocument("Csrc", "d", "1900", DocumentFormat.TXT, java.util.List.of("t"));
         uc.createDocument("Cdst", "d", "1900", DocumentFormat.TXT, java.util.List.of("t"));
@@ -253,9 +288,13 @@ class RelationControllerTest {
         assertDoesNotThrow(() -> rcDst.setRelationConfirmed(null, true));
     }
 
+    /*
+     * daoByConfirm
+     * - test diretto sulle API DAO: getSourceRelationsByConfirm/getDestinationRelationsByConfirm
+     * - verifica conferma e rimozione tramite setRelationConfirmed
+     */
     @Test
-    void daoGetRelationsByConfirmDirectly() {
-        // test diretto sulle API DAO getSourceRelationsByConfirm / getDestinationRelationsByConfirm
+    void daoByConfirm() {
         UserController uc = new UserController(currentUser);
         uc.createDocument("Dsrc", "d", "1900", DocumentFormat.TXT, java.util.List.of("t"));
         uc.createDocument("Ddst", "d", "1900", DocumentFormat.TXT, java.util.List.of("t"));

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.print.Doc;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -60,106 +61,117 @@ class UserControllerTest {
         }
     }
 
-    // searchDocuments
+    /*
+     * searchDocuments
+     * - caso: nessuna corrispondenza sul titolo
+     * - caso: trova documento per titolo
+     * - caso: trova documento per formato
+     */
     @Test
-    void searchDocuments_noMatchTitle_returnsEmpty() {
+    void searchDocuments() {
+        // caso: nessuna corrispondenza sul titolo
         DocumentSearchCriteria criteria = new DocumentSearchCriteria();
         criteria.setDocumentTitle("no-match-title");
         ArrayList<Document> results = controller.searchDocuments(criteria);
         assertNotNull(results);
         assertTrue(results.isEmpty(), "La ricerca senza corrispondenze deve restituire lista vuota");
-    }
 
-    @Test
-    void searchDocuments_matchByTitle_findsDoc() {
+        // caso: trova documento per titolo
         String title = "Unique-" + System.currentTimeMillis();
         controller.createDocument(title, "desc", "1800", DocumentFormat.TXT, List.of("t1"));
-        DocumentSearchCriteria c = new DocumentSearchCriteria();
-        c.setDocumentTitle(title);
-        ArrayList<Document> results = controller.searchDocuments(c);
-        assertTrue(results.stream().anyMatch(d -> title.equals(d.getTitle())));
-    }
+        DocumentSearchCriteria c1 = new DocumentSearchCriteria();
+        c1.setDocumentTitle(title);
+        ArrayList<Document> results1 = controller.searchDocuments(c1);
+        assertTrue(results1.stream().anyMatch(d -> title.equals(d.getTitle())));
 
-    @Test
-    void searchDocuments_matchByFormat_findsDoc() {
+        // caso: trova documento per formato
         controller.createDocument("PDFDoc", "desc", "1800", DocumentFormat.PDF, List.of("t1"));
-        DocumentSearchCriteria c = new DocumentSearchCriteria();
-        c.setFormat(DocumentFormat.PDF);
-        ArrayList<Document> results = controller.searchDocuments(c);
-        assertTrue(results.stream().anyMatch(d -> d.getFormat() == DocumentFormat.PDF));
+        DocumentSearchCriteria c2 = new DocumentSearchCriteria();
+        c2.setFormat(DocumentFormat.PDF);
+        ArrayList<Document> results2 = controller.searchDocuments(c2);
+        assertTrue(results2.stream().anyMatch(d -> d.getFormat() == DocumentFormat.PDF));
     }
 
-    // writeComment
+    /*
+     * writeComment
+     * - caso: aggiunge commento su documento esistente
+     * - caso: testo vuoto viene ignorato
+     * - caso: documento inesistente viene ignorato
+     */
     @Test
-    void writeComment_addsCommentOnExistingDoc() {
+    void writeComment() {
+        // aggiunge commento su documento esistente
         controller.createDocument("DocC", "desc", "2000", DocumentFormat.PDF, List.of("t"));
         List<Document> docs = documentDAO.getDocumentsByAuthor(currentUser.getId());
         assertFalse(docs.isEmpty());
         int docId = docs.get(0).getId();
         controller.writeComment(docId, "Hello");
         assertFalse(commentDAO.getCommentsByDocument(docId).isEmpty(), "Commento non aggiunto");
-    }
 
-    @Test
-    void writeComment_emptyText_isIgnored() {
+        // testo vuoto viene ignorato
         controller.createDocument("DocC2", "desc", "2000", DocumentFormat.PDF, List.of("t"));
-        int docId = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0).getId();
-        controller.writeComment(docId, " ");
-        assertTrue(commentDAO.getCommentsByDocument(docId).isEmpty());
-    }
+        List<Document> doc= documentDAO.getDocumentsByAuthor(currentUser.getId());
+        int docId2 = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0).getId();
+        controller.writeComment(docId2, " ");
+        assertTrue(commentDAO.getCommentsByDocument(docId2).isEmpty());
 
-    @Test
-    void writeComment_nonExistingDoc_isIgnored() {
+        // documento inesistente viene ignorato (nessuna eccezione)
         int nonExistingDocId = Integer.MAX_VALUE; // improbabile esista
         controller.writeComment(nonExistingDocId, "Hello");
-        // nessuna eccezione, nessun commento scritto ovviamente
         assertTrue(commentDAO.getCommentsByDocument(nonExistingDocId).isEmpty());
     }
 
-    // createDocument
+    /*
+     * createDocument
+     * - caso: crea documento con titolo
+     * - caso: incrementa nextFileName dell'utente
+     * - caso: input non validi gestiti senza eccezioni
+     */
     @Test
-    void createDocument_createsRecordWithTitle() {
+    void createDocument() {
+        // crea documento con titolo
         controller.createDocument("MyDoc", "desc", "1900-1950", DocumentFormat.PDF, List.of("a", "b"));
         List<Document> docs = documentDAO.getDocumentsByAuthor(currentUser.getId());
         assertFalse(docs.isEmpty());
         assertEquals("MyDoc", docs.get(0).getTitle());
-    }
 
-    @Test
-    void createDocument_incrementsNextFileName() {
+        // incrementa nextFileName
         int prev = currentUser.getNextFileName();
         controller.createDocument("T", "d", "1900", DocumentFormat.PDF, List.of("t"));
         assertEquals(prev + 1, currentUser.getNextFileName());
-    }
 
-    @Test
-    void createDocument_invalidInputs_areHandledGracefully() {
-        // titoli/descrizioni/periodi/format null o vuoti non dovrebbero lanciare eccezioni verso l'esterno
+        // input non validi non devono lanciare eccezioni
         assertDoesNotThrow(() -> controller.createDocument(null, "d", "1900", DocumentFormat.PDF, List.of("t")));
         assertDoesNotThrow(() -> controller.createDocument("Doc", null, "1900", DocumentFormat.PDF, List.of("t")));
         assertDoesNotThrow(() -> controller.createDocument("Doc", "d", null, DocumentFormat.PDF, List.of("t")));
         assertDoesNotThrow(() -> controller.createDocument("Doc", "d", "1900", null, List.of("t")));
     }
 
-    // viewOwnDocuments
+    /*
+     * viewOwnDocuments
+     * - caso: inizialmente vuoto
+     * - caso: dopo creazione contiene il documento
+     */
     @Test
-    void viewOwnDocuments_initiallyEmpty() {
+    void viewOwnDocuments() {
         ArrayList<Document> docs = controller.viewOwnDocuments();
         assertNotNull(docs);
         assertTrue(docs.isEmpty());
-    }
 
-    @Test
-    void viewOwnDocuments_afterCreation_hasOneDoc() {
         controller.createDocument("Mine", "d", "1900", DocumentFormat.TXT, List.of("t"));
-        ArrayList<Document> docs = controller.viewOwnDocuments();
-        assertEquals(1, docs.size());
-        assertEquals("Mine", docs.get(0).getTitle());
+        ArrayList<Document> docs2 = controller.viewOwnDocuments();
+        assertEquals(1, docs2.size());
+        assertEquals("Mine", docs2.get(0).getTitle());
     }
 
-    // addDocumentToCollection
+    /*
+     * addDocumentToCollection
+     * - caso: aggiunge documento a collection posseduta
+     * - caso: non aggiunge se la collection è di un altro utente
+     * - caso: input invalidi gestiti senza eccezioni
+     */
     @Test
-    void addDocumentToCollection_ownedCollection_addsDoc() {
+    void addDocumentToCollection() {
         controller.createDocument("Dcol", "d", "1900", DocumentFormat.PDF, List.of("t"));
         int docId = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0).getId();
         collectionDAO.addCollection("C1", "desc", currentUser);
@@ -167,32 +179,33 @@ class UserControllerTest {
         controller.addDocumentToCollection(docId, colId);
         boolean present = collectionDAO.getDocumentsByCollection(colId).stream().anyMatch(d -> d.getId() == docId);
         assertTrue(present, "Documento non inserito in collection posseduta");
-    }
 
-    @Test
-    void addDocumentToCollection_notOwnedCollection_doesNothing() {
+        // not owned
         controller.createDocument("Dcol2", "d", "1900", DocumentFormat.PDF, List.of("t"));
-        int docId = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0).getId();
+        int docId2 = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0).getId();
         String otherEmail = "other+" + System.currentTimeMillis() + "@example.com";
         userDAO.addUser("Other", "User", otherEmail, "pwd", false, false);
         User other = userDAO.getUserByEmail(otherEmail);
         collectionDAO.addCollection("OtherC", "desc", other);
         int otherColId = collectionDAO.getCollectionsByUser(other.getId()).get(0).getId();
-        controller.addDocumentToCollection(docId, otherColId);
-        boolean present = collectionDAO.getDocumentsByCollection(otherColId).stream().anyMatch(d -> d.getId() == docId);
-        assertFalse(present);
-    }
+        controller.addDocumentToCollection(docId2, otherColId);
+        boolean present2 = collectionDAO.getDocumentsByCollection(otherColId).stream().anyMatch(d -> d.getId() == docId2);
+        assertFalse(present2);
 
-    @Test
-    void addDocumentToCollection_invalidIds_areHandled() {
+        // invalid ids
         int invalidDocId = Integer.MAX_VALUE;
         int invalidColId = Integer.MAX_VALUE;
         assertDoesNotThrow(() -> controller.addDocumentToCollection(invalidDocId, invalidColId));
     }
 
-    // removeDocumentToCollection
+    /*
+     * removeDocumentToCollection
+     * - caso: rimuove da collection posseduta
+     * - caso: non rimuove da collection di un altro utente
+     * - caso: input invalidi gestiti senza eccezioni
+     */
     @Test
-    void removeDocumentToCollection_ownedCollection_removesDoc() {
+    void removeDocumentToCollection() {
         controller.createDocument("Dcol2", "d", "1900", DocumentFormat.PDF, List.of("t"));
         int docId = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0).getId();
         collectionDAO.addCollection("C2", "desc", currentUser);
@@ -201,61 +214,58 @@ class UserControllerTest {
         controller.removeDocumentToCollection(docId, colId);
         boolean present = collectionDAO.getDocumentsByCollection(colId).stream().anyMatch(d -> d.getId() == docId);
         assertFalse(present, "Documento non rimosso dalla collection");
-    }
 
-    @Test
-    void removeDocumentToCollection_notOwnedCollection_doesNothing() {
+        // not owned
         controller.createDocument("Dcol4", "d", "1900", DocumentFormat.PDF, List.of("t"));
-        int docId = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0).getId();
+        int docId2 = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0).getId();
         String otherEmail = "other+" + System.currentTimeMillis() + "@example.com";
         userDAO.addUser("Other", "User", otherEmail, "pwd", false, false);
         User other = userDAO.getUserByEmail(otherEmail);
         collectionDAO.addCollection("OtherC2", "desc", other);
         int otherColId = collectionDAO.getCollectionsByUser(other.getId()).get(0).getId();
-        collectionDAO.addDocumentToCollection(docId, otherColId);
-        controller.removeDocumentToCollection(docId, otherColId);
-        boolean present = collectionDAO.getDocumentsByCollection(otherColId).stream().anyMatch(d -> d.getId() == docId);
-        assertTrue(present);
-    }
+        collectionDAO.addDocumentToCollection(docId2, otherColId);
+        controller.removeDocumentToCollection(docId2, otherColId);
+        boolean present3 = collectionDAO.getDocumentsByCollection(otherColId).stream().anyMatch(d -> d.getId() == docId2);
+        assertTrue(present3);
 
-    @Test
-    void removeDocumentToCollection_invalidIds_areHandled() {
+        // invalid ids
         assertDoesNotThrow(() -> controller.removeDocumentToCollection(Integer.MAX_VALUE, Integer.MAX_VALUE));
     }
 
-    // askForPublication
+    /*
+     * askForPublication
+     * - caso: crea richiesta per documento proprio
+     * - caso: setta lo status del documento a PENDING
+     * - caso: non crea duplicati
+     * - caso: non crea richiesta per documenti non propri
+     * - caso: input non esistenti gestiti senza eccezioni
+     */
     @Test
-    void askForPublication_ownDoc_createsRequest() {
+    void askForPublication() {
         controller.createDocument("Pub1", "d", "1900", DocumentFormat.PDF, List.of("t"));
         int docId = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0).getId();
         controller.askForPublication(docId);
         boolean exists = publishRequestDAO.getRequestsByStatus(RequestStatus.PENDING)
                 .stream().anyMatch(r -> r.getDocument() != null && r.getDocument().getId() == docId);
         assertTrue(exists, "Publish request non creata");
-    }
 
-    @Test
-    void askForPublication_setsDocumentPending() {
+        // setta PENDING
         controller.createDocument("Pub2", "d", "1900", DocumentFormat.PDF, List.of("t"));
-        int docId = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0).getId();
-        controller.askForPublication(docId);
-        Document d = documentDAO.getDocumentById(docId);
+        int docId2 = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0).getId();
+        controller.askForPublication(docId2);
+        Document d = documentDAO.getDocumentById(docId2);
         assertEquals(DocumentStatus.PENDING, d.getStatus(), "Documento non settato a PENDING");
-    }
 
-    @Test
-    void askForPublication_duplicateRequest_notCreated() {
+        // duplicato
         controller.createDocument("Pub3", "d", "1900", DocumentFormat.PDF, List.of("t"));
-        int docId = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0).getId();
-        controller.askForPublication(docId);
-        controller.askForPublication(docId);
+        int docId3 = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0).getId();
+        controller.askForPublication(docId3);
+        controller.askForPublication(docId3);
         long count = publishRequestDAO.getRequestsByStatus(RequestStatus.PENDING)
-                .stream().filter(r -> r.getDocument() != null && r.getDocument().getId() == docId).count();
+                .stream().filter(r -> r.getDocument() != null && r.getDocument().getId() == docId3).count();
         assertEquals(1, count);
-    }
 
-    @Test
-    void askForPublication_notOwnedDoc_isIgnored() {
+        // non proprio
         String otherEmail = "other+" + System.currentTimeMillis() + "@example.com";
         userDAO.addUser("Other", "User", otherEmail, "pwd", false, false);
         User other = userDAO.getUserByEmail(otherEmail);
@@ -263,49 +273,49 @@ class UserControllerTest {
         otherController.createDocument("OtherDoc", "d", "1900", DocumentFormat.PDF, List.of("t"));
         int otherDocId = documentDAO.getDocumentsByAuthor(other.getId()).get(0).getId();
         controller.askForPublication(otherDocId);
-        boolean exists = publishRequestDAO.getRequestsByStatus(RequestStatus.PENDING)
+        boolean existsOther = publishRequestDAO.getRequestsByStatus(RequestStatus.PENDING)
                 .stream().anyMatch(r -> r.getDocument() != null && r.getDocument().getId() == otherDocId);
-        assertFalse(exists);
-    }
+        assertFalse(existsOther);
 
-    @Test
-    void askForPublication_nonExistingDoc_isIgnored() {
+        // non esistente
         assertDoesNotThrow(() -> controller.askForPublication(Integer.MAX_VALUE));
     }
 
-    // favourites: documents
+    /*
+     * favourites: documents
+     * - caso: aggiunge e rimuove documenti dai preferiti
+     * - caso: input invalidi gestiti senza eccezioni
+     */
     @Test
-    void addDocumentToFavourites_insertsRow() {
+    void favouritesDocuments() {
         controller.createDocument("FavD1", "d", "1900", DocumentFormat.PDF, List.of("t"));
         int docId = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0).getId();
         controller.addDocumentToFavourites(docId);
         boolean present = userDAO.getFavouriteDocument(currentUser.getId()).stream().anyMatch(d -> d.getId() == docId);
         assertTrue(present, "Documento non aggiunto ai preferiti");
-    }
 
-    @Test
-    void addDocumentToFavourites_invalidDocId_isHandled() {
+        // invalid add
         assertDoesNotThrow(() -> controller.addDocumentToFavourites(Integer.MAX_VALUE));
-    }
 
-    @Test
-    void removeDocumentFromFavourites_deletesRow() {
+        // remove
         controller.createDocument("FavD2", "d", "1900", DocumentFormat.PDF, List.of("t"));
-        int docId = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0).getId();
-        controller.addDocumentToFavourites(docId);
-        controller.removeDocumentFromFavourites(docId);
-        boolean present = userDAO.getFavouriteDocument(currentUser.getId()).stream().anyMatch(d -> d.getId() == docId);
-        assertFalse(present, "Documento non rimosso dai preferiti");
-    }
+        int docId2 = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0).getId();
+        controller.addDocumentToFavourites(docId2);
+        controller.removeDocumentFromFavourites(docId2);
+        boolean present2 = userDAO.getFavouriteDocument(currentUser.getId()).stream().anyMatch(d -> d.getId() == docId2);
+        assertFalse(present2, "Documento non rimosso dai preferiti");
 
-    @Test
-    void removeDocumentFromFavourites_invalidDocId_isHandled() {
+        // invalid remove
         assertDoesNotThrow(() -> controller.removeDocumentFromFavourites(Integer.MAX_VALUE));
     }
 
-    // favourites: collections
+    /*
+     * favourites: collections
+     * - caso: aggiunge e rimuove collection dai preferiti (verifiche dirette sul DB)
+     * - caso: input invalidi gestiti senza eccezioni
+     */
     @Test
-    void addCollectionToFavourites_insertsRow() {
+    void favouritesCollections() {
         collectionDAO.addCollection("Cfav1", "desc", currentUser);
         int colId = collectionDAO.getCollectionsByUser(currentUser.getId()).get(0).getId();
         controller.addCollectionToFavourites(colId);
@@ -321,23 +331,19 @@ class UserControllerTest {
         } catch (SQLException e) {
             fail("Verifica favourite_collection fallita: " + e.getMessage());
         }
-    }
 
-    @Test
-    void addCollectionToFavourites_invalidCollectionId_isHandled() {
+        // invalid add
         assertDoesNotThrow(() -> controller.addCollectionToFavourites(Integer.MAX_VALUE));
-    }
 
-    @Test
-    void removeCollectionFromFavourites_deletesRow() {
+        // remove
         collectionDAO.addCollection("Cfav2", "desc", currentUser);
-        int colId = collectionDAO.getCollectionsByUser(currentUser.getId()).get(0).getId();
-        controller.addCollectionToFavourites(colId);
-        controller.removeCollectionFromFavourites(colId);
+        int colId2 = collectionDAO.getCollectionsByUser(currentUser.getId()).get(0).getId();
+        controller.addCollectionToFavourites(colId2);
+        controller.removeCollectionFromFavourites(colId2);
         try {
             PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) AS cnt FROM favourite_collection WHERE user_id=? AND collection_id=?");
             ps.setInt(1, currentUser.getId());
-            ps.setInt(2, colId);
+            ps.setInt(2, colId2);
             ResultSet rs = ps.executeQuery();
             int cnt = rs.next() ? rs.getInt("cnt") : 0;
             rs.close();
@@ -346,10 +352,8 @@ class UserControllerTest {
         } catch (SQLException e) {
             fail("Verifica favourite_collection fallita: " + e.getMessage());
         }
-    }
 
-    @Test
-    void removeCollectionFromFavourites_invalidCollectionId_isHandled() {
+        // invalid remove
         assertDoesNotThrow(() -> controller.removeCollectionFromFavourites(Integer.MAX_VALUE));
     }
 
@@ -368,4 +372,3 @@ class UserControllerTest {
         // Todo implementare
     }
 }
-
