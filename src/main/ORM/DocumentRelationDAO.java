@@ -19,7 +19,7 @@ public class DocumentRelationDAO extends BaseDAO {
     }
     public void addDocumentRelation(int sourceId,int destinationId,DocumentRelationType type,boolean confirmed){
         try{
-            String query="INSERT INTO document_relation (source_id,destination_id,relation_type,confirmed) VALUES (?,?,?,?)";
+            String query="INSERT INTO document_relation (source_id,destination_id,relation_type,confirmed) VALUES (?,?,?,?) ON CONFLICT (source_id,destination_id) DO NOTHING";
             PreparedStatement ps=connection.prepareStatement(query);
             ps.setInt(1,sourceId);
             ps.setInt(2,destinationId);

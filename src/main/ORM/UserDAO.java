@@ -80,7 +80,7 @@ public class UserDAO extends BaseDAO {
     public List<User> getModerators() {
         List<User> moderators = new ArrayList<User>();
         try{
-            String query = "SELECT * FROM user WHERE is_moderator = true";
+            String query = "SELECT * FROM \"user\" WHERE is_moderator = true";
             PreparedStatement statement = connection.prepareStatement(query);
             ResultSet rs= statement.executeQuery();
             while(rs.next()) {
