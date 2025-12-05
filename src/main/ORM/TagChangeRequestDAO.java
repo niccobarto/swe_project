@@ -202,6 +202,28 @@ public class TagChangeRequestDAO extends BaseDAO {
         return out;
     }
 
+    public List<TagChangeRequest> getRequestsByDocument(int documentId) {
+        List<TagChangeRequest> out = new ArrayList<>();
+        try {
+            String q = "SELECT * FROM tag_change_request " +
+                    "WHERE document_id = ? " +
+                    "ORDER BY date_request ASC";
+            PreparedStatement ps = connection.prepareStatement(q);
+            ps.setInt(1, documentId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                out.add(map(rs));
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE,
+                    "Error during getRequestsByDocument(documentId=" + documentId + ")", e);
+        }
+        return out;
+    }
+
+
     //controlla se c'è un'altra richiesta pending al documento preso in considerazione
     public boolean existsPendingDuplicate(int documentId,
                                           TagChangeOperation op,
