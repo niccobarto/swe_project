@@ -25,6 +25,9 @@ class UserControllerTest {
     private PublishRequestDAO publishRequestDAO;
     private User currentUser;
     private UserController controller;
+    private TagDAO tagDAO;
+    private TagChangeRequestDAO tagChangeRequestDAO;
+
 
     @BeforeEach
     void setUp() {
@@ -39,6 +42,8 @@ class UserControllerTest {
             commentDAO = new CommentDAO();
             collectionDAO = new CollectionDAO();
             publishRequestDAO = new PublishRequestDAO();
+            tagDAO = new TagDAO();
+            tagChangeRequestDAO = new TagChangeRequestDAO();
             String email = "uctest+" + System.currentTimeMillis() + "@example.com";
             userDAO.addUser("Unit", "Tester", email, "pwd", false, false);
             currentUser = userDAO.getUserByEmail(email);
@@ -359,16 +364,138 @@ class UserControllerTest {
 
     @Test
     void requestAddExistingTag() {
-        // Todo implementare
+        // caso: crea richiesta valida per tag ESISTENTE
+        controller.createDocument("DocTagExist", "d", "1900", DocumentFormat.PDF, List.of("t"));
+        List<Document> docs = documentDAO.getDocumentsByAuthor(currentUser.getId());
+        assertFalse(docs.isEmpty());
+        int docId = docs.get(0).getId();
+
+        // creo un tag già presente in tabella tag
+        String label = "ESISTENTE-" + System.currentTimeMillis();
+        tagDAO.addTag(new Tag(label, "desc"));
+
+        // prima della chiamata nessuna richiesta
+        List<TagChangeRequest> before = tagChangeRequestDAO.getByAuthor(currentUser.getId());
+        assertTrue(before.isEmpty());
+
+        // chiamata valida
+        controller.requestAddExistingTag(docId, label);
+
+        // deve esistere UNA richiesta PENDING ADD per quel documento/tag
+        List<TagChangeRequest> after = tagChangeRequestDAO.getByAuthor(currentUser.getId());
+        assertEquals(1, after.size());
+        TagChangeRequest r = after.get(0);
+        assertEquals(docId, r.getDocument().getId());
+        assertEquals(TagChangeOperation.ADD, r.getOperation());
+        assertEquals(RequestStatus.PENDING, r.getStatus());
+        assertEquals(label, r.getExistingTagLabel());
+        assertNull(r.getProposedLabel());
+
+        // caso: richiesta DUPLICATA sullo stesso doc/tag -> non crea nuove righe
+        controller.requestAddExistingTag(docId, label);
+        List<TagChangeRequest> afterDup = tagChangeRequestDAO.getByAuthor(currentUser.getId());
+        long countSame = afterDup.stream()
+                .filter(x -> x.getDocument() != null
+                        && x.getDocument().getId() == docId
+                        && label.equals(x.getExistingTagLabel())
+                        && x.getOperation() == TagChangeOperation.ADD
+                        && x.getStatus() == RequestStatus.PENDING)
+                .count();
+        assertEquals(1, countSame, "La seconda chiamata non deve creare richieste duplicate");
+
+        // caso: documento inesistente -> nessuna richiesta aggiuntiva
+        controller.requestAddExistingTag(Integer.MAX_VALUE, label);
+        List<TagChangeRequest> afterInvalidDoc = tagChangeRequestDAO.getByAuthor(currentUser.getId());
+        long countAfterInvalidDoc = afterInvalidDoc.stream()
+                .filter(x -> x.getDocument() != null
+                        && x.getDocument().getId() == docId
+                        && label.equals(x.getExistingTagLabel())
+                        && x.getOperation() == TagChangeOperation.ADD
+                        && x.getStatus() == RequestStatus.PENDING)
+                .count();
+        assertEquals(1, countAfterInvalidDoc, "Chiamate con docId invalido non devono modificare il DB");
     }
 
     @Test
     void requestAddNewTag() {
-        // Todo implementare
+        // Arrange
+        controller.createDocument(
+                "DocNewTag",
+                "desc",
+                "1900",
+                DocumentFormat.PDF,
+                List.of()
+        );
+
+        List<Document> docs = documentDAO.getDocumentsByAuthor(currentUser.getId());
+        assertEquals(1, docs.size());
+        Document doc = docs.get(0);
+
+        String proposedLabel = "NuovoTagSpeciale";
+
+        // Il tag NON deve esistere nel catalogo prima
+        assertNull(tagDAO.findByLabelNormalized(proposedLabel));
+
+        // Act
+        controller.requestAddNewTag(doc.getId(), proposedLabel);
+
+        // Assert
+        List<TagChangeRequest> reqs = tagChangeRequestDAO.getRequestsByDocument(doc.getId());
+        assertEquals(1, reqs.size());
+        TagChangeRequest r = reqs.get(0);
+
+        assertEquals(TagChangeOperation.ADD, r.getOperation());
+        assertEquals(RequestStatus.PENDING, r.getStatus());
+        assertEquals(doc.getId(), r.getDocument().getId());
+
+        assertNull(r.getExistingTagLabel());
+        assertEquals(proposedLabel, r.getProposedLabel());
+
+        // Il Tag vero non deve ancora esistere
+        assertNull(tagDAO.findByLabelNormalized(proposedLabel));
     }
 
     @Test
     void requestRemoveTag() {
-        // Todo implementare
+        // Arrange: creo un documento
+        controller.createDocument(
+                "DocRemoveTag",
+                "desc",
+                "1900",
+                DocumentFormat.PDF,
+                List.of()
+        );
+
+        Document doc = documentDAO.getDocumentsByAuthor(currentUser.getId()).get(0);
+
+        // Creo un tag nel DB
+        String existingTag = "TagDaRimuovere";
+        tagDAO.addTag(new Tag(existingTag, null));
+
+        // Associo il tag al documento
+        documentDAO.addTagToDocument(doc.getId(), existingTag);
+
+        // Sanity check: il documento ha davvero il tag
+        assertEquals(1, documentDAO.getDocumentById(doc.getId()).getTags().size());
+
+        // Act: l’utente chiede di rimuovere il tag
+        controller.requestRemoveTag(doc.getId(), existingTag);
+
+        // Assert: viene creata UNA richiesta pending di tipo REMOVE
+        List<TagChangeRequest> reqs = tagChangeRequestDAO.getRequestsByDocument(doc.getId());
+        assertEquals(1, reqs.size());
+
+        TagChangeRequest r = reqs.get(0);
+
+        assertEquals(TagChangeOperation.REMOVE, r.getOperation());
+        assertEquals(RequestStatus.PENDING, r.getStatus());
+        assertEquals(doc.getId(), r.getDocument().getId());
+
+        assertEquals(existingTag, r.getExistingTagLabel());
+        assertNull(r.getProposedLabel(), "Nella REMOVE non ci deve essere proposedLabel");
+
+        // Il tag NON deve essere ancora rimosso dal documento
+        List<Tag> tagsAfter = documentDAO.getDocumentById(doc.getId()).getTags();
+        assertEquals(1, tagsAfter.size(), "Il tag non deve essere rimosso in questa fase");
     }
 }
