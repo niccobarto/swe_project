@@ -1,0 +1,487 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{subcaption}
+\geometry{margin=2.5cm}
+
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{1,1,1}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+\begin{document}
+ \thispagestyle{empty}
+ \begin{figure}
+     \centering
+     \includegraphics[width=0.9\linewidth]{images/unifi.png}
+     \label{fig:placeholder}
+ \end{figure}
+\begin{center}
+        \textbf{\Large UNIVERSITÀ DEGLI STUDI DI FIRENZE} \\[0.3cm]
+    \textsc{Dipartimento di Ingegneria dell’Informazione} \\[1.5cm]
+
+    % Titolo centrale
+    \rule{\textwidth}{0.4pt} \\[0.4cm]
+    {\LARGE \textbf{Scriptoria}} \\
+    \rule{\textwidth}{0.4pt} \\[3cm]
+
+    % Informazioni in tabella
+    \begin{tabular}{p{9cm} p{7cm}}
+        \textbf{Autori:} & \textbf{Corso:} \\
+        Cristiano Acciai \& Niccolò Bartoli & Ingegneria del software \\[0.8cm]
+
+        \textbf{N° Matricola:} & \textbf{Docente corso:} \\
+        7076811 \& 7076612 & Enrico Vicario \end{tabular}
+\end{center}
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introduzione}
+\subsection{Descrizione del progetto}
+Questa relazione ha lo scopo di definire e spiegare i punti chiave relativi alla progettazione di un software Java ideato per la pubblicazione e manutenzione di documenti musicali. L'obiettivo principale è quello di garantire l'affidabilità e autenticità dei documenti per la corretta manutenibilità culturale. Questo tramite moderatori che hanno conoscenza riguardo l'arte con il ruolo di approvare i documenti pubblicati da un Autore; un documento si considera pubblico solo dopo tale conferma. Un utente autenticato potrà quindi visualizzare i documenti pubblici tramite una ricerca legata a vari parametri, aprire il documento, commentarlo o interagirci inserendolo in specifiche collezioni private. Il ruolo dell'admin è quello di un super-utente, che cioè amministra le funzionalità degli utenti e delle funzionalità associate. 
+\subsection{Struttura del progetto e ambiente di sviluppo}
+Il progetto si compone in diversi package per permettere modularità e singola responsabilità. La suddivisione in livelli consente di ottenere alta modularità, mantenibilità e separazione delle responsabilità. Ogni layer presenta un grado diverso di astrazione, riducendo le dipendenze e facilitando l’evoluzione del software.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/project_structure.png}
+    \caption{Architettura del progetto software}
+    \label{fig:placeholder}
+\end{figure}
+I package che troviamo nell'architettura sono i seguenti:
+\begin{itemize}
+    \item \textbf{Interfaccia}: definisce come l'utente interagisce con il software, permettendo di collegare la rappresentazione grafica alle funzionalità di dominio del software. Non è stata implementata, ma una sua versione semplificata può essere compresa visualizzando i mockup presenti nel prossimo paragrafo.
+    \item \textbf{Business Logic}: contiene la logica di business dell'architettura, definendo le funzionalità che ogni tipologia di utente può effettuare nel software. Il package dell'interfaccia invoca questi metodi in seguito ad un evento dell'utente.
+    \item \textbf{Domain Model}: le classi contenute in questo package definiscono le entità del software, come i documenti (\texttt{Document}), le richieste di pubblicazione (\texttt{PublishRequest}) o i commenti (\texttt{Comment}).
+    \item \textbf{ORM}: questo livello contiene le classi che gestiscono la persistenza degli oggetti del dominio, trasformandoli in record del database. Qui avviene la mappatura tra classi del Domain Model e tabelle, oltre alla definizione delle operazioni di CRUD tramite l'implementazione concreta delle classi DAO.
+    \item \textbf{JDBC}: fornisce l'accesso a basso livello al database tramite la definizioni di connessioni con esso. Tali connessioni sono fondamentali per le classi DAO definite nell'ORM permettendo di ottenere i risultati delle query.
+    \item \textbf{RDBMS}:rappresenta il sistema che conserva effettivamente i dati con tabelle che rappresentano il nostro dominio, vincoli e relazioni. Nel nostro caso troviamo PostgreSQL come DBMS relazionale scelto.
+\end{itemize}
+
+Parlando invece dell'ambiente di sviluppo dell'applicazione:
+\begin{itemize}
+    \item \textbf{IntelliJ IDEA}: IDE predefinito per la scrittura del codice Java;
+    \item \textbf{StarUML}: creazione di diagrammi UML, use case, modello ER, modello relazionale;
+    \item \textbf{PgAdmin}: piattaforma per lo sviluppo e amministrazione di database PostgreSQL;
+    \item \textbf{Lunacy}: software di creazione di mockup;
+\end{itemize}
+\section{Progettazione del software}
+\subsection{Attori e casi d'uso}
+Il sistema prevede diverse tipologie di attori, ognuna delle quali dispone di funzionalità specifiche coerenti con il proprio ruolo nel dominio applicativo. I casi d’uso descrivono le interazioni tra gli attori e il sistema, specificando obiettivi, vincoli e dipendenze tra funzionalità.
+
+Di seguito sono presentati i tre diagrammi dei casi d’uso, uno per ciascuna categoria di attori principali.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{images/usecase_user.png}
+\caption{Casi d’uso dell’Utente / Autore}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{images/usecase_moderator.png}
+\caption{Casi d’uso dell’attore Moderatore}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\linewidth]{images/usecase_admin.png}
+\caption{Casi d’uso dell’attore Admin}
+\end{figure}
+
+\subsubsection{Utente predefinito}
+L’utente predefinito è un soggetto autenticato che può accedere alle funzionalità del sistema adibite alla consultazione dei documenti pubblicati e la ricerca filtrata. Può rilasciare commenti sotto uno specifico documento che sarà pubblico a tutti gli altri utenti del sistema, che siano con stesso livello di accesso o moderatori/admin. Può organizzare documenti in collezioni o spuntarli come preferito.
+\subsubsection{Autore}
+L’Autore è un utente autenticato che può creare, modificare e gestire i propri documenti. Qualsiasi utente ha la possibilità di pubblicare documenti, pertanto Autore viene considerato un tipo specifico di Utente. È la figura centrale nella produzione di contenuti:
+può caricare nuovi documenti, etichettarli con tag, organizzarli in collezioni, e soprattutto inviare una richiesta di pubblicazione, che verrà valutata dai Moderatori. Definisce relazioni tra documenti di propria proprietà ed altrui, ovvero collegamenti significativi che definiscono una rete. Gestisce le richieste di relazione che riguardano i propri documenti pubblicati. 
+
+%TABELLA USE CASE 1
+\begin{table}[H]
+\small
+\centering
+\begin{tabular}{|p{5cm}|p{9cm}|}
+\hline
+\textbf{Use Case 1} & \textbf{Creazione documento} \\
+\hline
+\textbf{Descrizione use case} &
+L’utente è in grado di creare documenti di un certo formato caricandone il contenuto. \\
+\hline
+\textbf{Attori coinvolti} & Utente (Autore) \\
+\hline
+\textbf{Flusso base} &
+\begin{enumerate}
+    \item L’utente definisce tutti i parametri necessari alla creazione di un documento nella GUI.
+    \item Clicca il pulsante di creazione documento.
+    \item Il sistema genera automaticamente i campi \texttt{file\_path} e \texttt{file\_name}, necessari al salvataggio.
+    \item La creazione del documento avviene correttamente.
+\end{enumerate} \\ 
+\hline
+\textbf{Flusso alternativo} &
+\begin{itemize}
+    \item Se i valori passati non rispettano i tipi previsti, viene generata un’eccezione.
+\end{itemize} \\
+\hline
+\textbf{Post-condizioni} &
+Ora l’utente possiede un documento associato al proprio profilo come autore.  
+Può richiedere la pubblicazione oppure modificarlo. \\
+\hline
+\end{tabular}
+\caption{Template di descrizione del caso d'uso "Creazione documento"}
+\end{table}
+
+
+%TABELLA USE CASE 2
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{5cm}|p{9cm}|}
+\hline
+\textbf{Use Case 2} & \textbf{Aggiungere tag a documento} \\
+\hline
+\textbf{Descrizione use case} &
+Todo \\
+\hline
+\textbf{Attori coinvolti} & Utente (Autore) \\
+\hline
+\textbf{Flusso base} &
+\begin{enumerate}
+    \item Todo
+    \item
+    \item
+\end{enumerate} \\ 
+\hline
+\textbf{Flusso alternativo} &
+\begin{itemize}
+    \item Todo
+\end{itemize} \\
+\hline
+\textbf{Post-condizioni} &
+Todo \\
+\hline
+\end{tabular}
+\caption{Template di descrizione del caso d'uso "Aggiunta tag a documento"}
+\end{table}
+
+%TABELLA USE CASE 3
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{5cm}|p{9cm}|}
+\hline
+\textbf{Use Case 3} & \textbf{Creare relazioni tra documenti} \\
+\hline
+\textbf{Descrizione use case} &
+Un autore può definire una relazione tra due documenti pubblicati, scegliendo il tipo di relazione
+(e.g. \texttt{NEW\_VERSION\_OF}).  
+La relazione diviene visibile a tutti solo dopo l'accettazione da parte dell’autore del documento di destinazione. \\
+\hline
+\textbf{Attori coinvolti} &
+Utente mittente, Utente destinatario \\
+\hline
+\textbf{Flusso base} &
+\begin{enumerate}
+    \item L’utente mittente seleziona un proprio documento pubblicato.
+    \item Seleziona un secondo documento, che può appartenere a sé stesso oppure a un altro autore.
+    \item Sceglie il tipo di relazione da creare e indica quale documento funge da \textit{source} e quale da \textit{destination}.
+    \item Il sistema registra la relazione come “in attesa di accettazione”.
+    \item L’autore del documento di destinazione visualizza la richiesta di relazione.
+    \item L’utente destinatario accetta la relazione, che diviene pubblica e accessibile a tutti gli utenti.
+\end{enumerate} \\
+\hline
+\textbf{Flusso alternativo} &
+\begin{itemize}
+    \item Se i due documenti appartengono allo stesso autore, la relazione viene pubblicata automaticamente senza alcuna richiesta.
+    \item Se l’autore del documento di destinazione non approva la relazione, essa rimane in stato non pubblicato ed eventualmente viene eliminata dal sistema.
+    \item Se uno dei documenti non è pubblicato, la relazione non può essere creata.
+\end{itemize} \\
+\hline
+\textbf{Post-condizioni} &
+Una volta accettata, la relazione tra i due documenti è visibile a tutti gli utenti
+e favorisce la navigazione tra documenti connessi da affinità di contenuto, versione o struttura. \\
+\hline
+\end{tabular}
+\caption{Template di descrizione del caso d'uso "Creare relazioni tra documenti"}
+\end{table}
+
+
+\subsubsection{Moderatore}
+Il Moderatore ha il compito di garantire la qualità dei documenti pubblicati. Può visualizzare le richieste di pubblicazione in attesa, analizzare il contenuto del documento e approvarne o rifiutarne la pubblicazione.
+È inoltre in grado di consultare lo storico delle richieste già valutate, garantendo tracciabilità delle decisioni.
+
+%TABELLA USE CASE 4
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{5cm}|p{9cm}|}
+\hline
+\textbf{Use Case 4} & \textbf{Gestire richiesta pubblicazione} \\
+\hline
+\textbf{Descrizione use case} &
+Il moderatore analizza una richiesta di pubblicazione relativa a un documento caricato da un autore,
+visualizzandone contenuto e metadati, e decide se approvarla o rifiutarla. \\
+\hline
+\textbf{Attori coinvolti} &
+Moderatore \\
+\hline
+\textbf{Flusso base} &
+\begin{enumerate}
+    \item Il moderatore accede alla lista delle richieste di pubblicazione in attesa.
+    \item Seleziona una richiesta e visualizza il documento, i suoi metadati e le informazioni fornite dall’autore.
+    \item Valuta il contenuto e decide se approvare o rifiutare la richiesta.
+    \item In caso di approvazione, il sistema imposta lo stato del documento a \texttt{APPROVED} e lo rende pubblico.
+    \item In caso di rifiuto, il sistema imposta lo stato a \texttt{REJECTED} e permette al moderatore di inserire una motivazione.
+    \item La richiesta viene marcata come chiusa.
+\end{enumerate} \\
+\hline
+\textbf{Flusso alternativo} &
+\begin{itemize}
+    \item Se l’utente che tenta la valutazione non è un moderatore (o admin), l’operazione viene bloccata.
+    \item Il documento deve trovarsi in stato \texttt{DRAFT} prima della valutazione: in caso contrario la richiesta è invalida.
+\end{itemize} \\
+\hline
+\textbf{Post-condizioni} &
+A seconda dell’esito:
+\begin{itemize}
+    \item Se \texttt{APPROVED}, il documento diventa pubblico e consultabile da tutti gli utenti autenticati.
+    \item Se \texttt{REJECTED}, il documento rimane privato e l’autore può modificarlo e inviare una nuova richiesta.
+\end{itemize} \\
+\hline
+\end{tabular}
+\caption{Template di descrizione del caso d'uso "Gestire richiesta pubblicazione"}
+\end{table}
+
+\subsubsection{Admin}
+L’Admin è il super-utente del sistema, con accesso a tutte le funzionalità gestionali.
+Può amministrare utenti, documenti, collezioni e commenti, svolgendo funzioni di supervisione e mantenimento dell’integrità del sistema. Sceglie tra gli Utenti chi diventa Moderatore e ne affida le funzionalità di giudice di documenti citati precedentemente. Gli use case dell’Admin includono sia funzionalità correttive (ad esempio eliminazione contenuti) sia funzionalità amministrative (gestione ruoli).
+
+% TABELLA USE CASE 5
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|p{5cm}|p{9cm}|}
+\hline
+\textbf{Use Case 5} & \textbf{Eliminazione di un commento} \\
+\hline
+\textbf{Descrizione use case} &
+L’amministratore può rimuovere un commento pubblicato da un qualsiasi utente qualora risulti
+inappropriato, offensivo o non conforme alle linee guida della piattaforma. \\
+\hline
+\textbf{Attori coinvolti} &
+Admin \\
+\hline
+\textbf{Flusso base} &
+\begin{enumerate}
+    \item L’admin accede alla lista dei commenti associati ai documenti oppure associati ad uno specifico utente.
+    \item Seleziona il commento da eliminare.
+    \item Conferma l’operazione di eliminazione.
+    \item Il sistema rimuove definitivamente il commento dal database e aggiorna l’interfaccia utente.
+\end{enumerate} \\
+\hline
+\textbf{Flusso alternativo} &
+\begin{itemize}
+    \item Se il commento non esiste più (già eliminato o riferito a un documento rimosso), il sistema segnala l’errore.
+    \item Se l’utente che effettua l’operazione non ha privilegi da admin, l’azione viene bloccata.
+\end{itemize} \\
+\hline
+\textbf{Post-condizioni} &
+Il commento selezionato viene eliminato dal sistema, migliorando la qualità dei contenuti pubblici
+e mantenendo conforme lo spazio di discussione. \\
+\hline
+\end{tabular}
+\caption{Template di descrizione del caso d'uso "Eliminazione di un commento"}
+\end{table}
+\subsection{Mockups}
+Le seguenti immagini ritraggono i mockup per gli use case considerati negli use case templates riportati precedentemente:
+\subsection{Class diagram}
+Il diagramma delle classi fornisce una visuale dell’architettura del sistema, descrivendo le principali classi coinvolte, i loro attributi, le funzioni che forniscono e le relazioni che intercorrono tra di esse. Rispetto alla sola suddivisione in package presentata in precedenza, il class diagram consente di evidenziare in modo più preciso le responsabilità di ciascuna classe.
+
+Le classi sono organizzate nei tre package principali:
+\begin{itemize}
+    \item \textbf{Domain Model}: contiene le entità del dominio applicativo, cioè i concetti con cui si interagisce nell'utilizzo dell'applicazione (ad esempio \texttt{User}, \texttt{Document}, \texttt{Collection}, \texttt{PublishRequest}, \texttt{Comment},\texttt{DocumentSearchCriteria}, \texttt{DocumentSearchCriteriaB\-uilder}) e le relative enumerazioni
+    (\texttt{DocumentStatus}, \texttt{DocumentFormat}, \texttt{RequestSt\-atus}, \texttt{DocumentRelationType});
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/domainmodel.png}
+        \caption{Domain Model}
+    \end{figure}
+    \item \textbf{Business Logic}: comprende i controller responsabili dell’implementazione dei casi d’uso (ad esempio \texttt{UserController}, \texttt{AdminController}, \texttt{ModeratorController}, \texttt{RelationController}, \texttt{LoginController}) e che orchestrano le operazioni sulle entità del dominio;
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/businesslogic.png}
+        \caption{Business Logic}
+    \end{figure}
+    \item \textbf{ORM (Object Relation Mapping)}: raccoglie le classi DAO (\texttt{UserDAO}, \texttt{DocumentDAO}, \texttt{PublishRequestDAO}, \texttt{CommentDAO}, \texttt{CollectionDAO}, \texttt{DocumentsRelationDAO}) e le componenti di accesso al database (\texttt{BaseDAO}, \texttt{DBConnection}), incaricate di tradurre le operazioni sul modello a oggetti in query verso il database relazionale.
+     \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/orm.png}
+        \caption{ORM (Object Relation Mapping)}
+    \end{figure}
+
+\end{itemize}
+
+\subsubsection{Design pattern: Singleton}
+Considerando che ogni classe DAO presente nel package ORM per funzionare deve ottenere una connessione al database, si vuole definire un meccanismo che permetta di centralizzare questo processo. La classe \texttt{DBConnection} implementa il pattern creazionale \textbf{Signleton}, utilizzato per la garanzia di un'unica istanza di connessione al database.
+
+Il costrurrore della classe è dichiarato \texttt{private}, impedendo la creazione di oggetti tramite il costruttore. L'accesso alla connessione avviene esclusivamente attraverso il metodo \texttt{getConnection()} della classe astratta \texttt{BaseDAO}, estesa da tutte le classi DAO, che istanzia la connessione al database chiamando il metodo statico \texttt{getInstance()} di \texttt{DBConnection}. Tale metodo richiama il costruttore privato solamente al primo utilizzo, ritornando l'istanza appena creata oppure la cui creazione era avvenuta in invocazioni precedenti.
+
+
+
+\subsubsection{Design pattern: Mapper}
+Prendendo la classe \texttt{Comment} nel \textbf{Domain Model}, non rappresenta di per se un'entità autonoma, ma collegata direttamente al documento a cui è riferita e all'utente autore del commento. Il suo ruolo principale quindi è quello di \textbf{mappare} la relazione tra \texttt{User} e \texttt{Document}, aggiungendo come informazione il testo di tale commento.
+
+Tale design pattern viene chiamato \textbf{Mapper}. Anche alla classe \texttt{DocumentRelation} associamo le stesse caratteristiche, collegando due istanze di \texttt{Document} e includendo il tipo di relazione che c'è nella coppia.
+\begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/mapper.png}
+        \caption{Mapper}
+    \end{figure}
+\subsubsection{Design pattern: Builder}
+
+La classe \texttt{DocumentSearchCriteria} è stata introdotta per rappresentare in modo
+compatto i possibili filtri di ricerca sui documenti, come il titolo, l'autore, lo stato del documento, il formato, la data di creazione e l’insieme di tag
+associati. Poiché è presente un vasto spazio dei parametri possibili e non tutti possono essere utilizzati nella stessa ricerca, è necessario definire un meccanismo che ci distanzi dall'implementazione di numerosi costruttori per considerare ogni possibile gruppo di parametri, un problema denominato \textit{telescoping constructor}.
+
+Per evitare questo problema è stato adottato il pattern \textit{Builder}. La classe
+\texttt{DocumentSe\-archCriteriaBuilder} funge da costruttore dedicato: essa espone metodi
+che permettono di impostare solo i campi di interesse e, tramite il metodo \texttt{build()},
+restituisce un’istanza di \texttt{DocumentSearchCriteria}. In questo modo è
+possibile creare criteri di ricerca complessi senza ricorrere a costruttori con lunghi
+elenchi di parametri, migliorando la leggibilità del codice e rispettando l'\textit{Open/Closed Principle}. Infatti l'aggiunta di un nuovo parametro di ricerca non richiederà la modifica del codice qui mostrato, ma soltanto l'estensione con l'aggiunta del parametro desiderato e del relativo metodo \texttt{set...()}
+
+Nella pratica, la Business Logic costruisce un oggetto \texttt{DocumentSearchCriteria}
+tramite il builder a partire dai filtri selezionati dall’utente, e lo passa ai DAO
+responsabili della generazione della query SQL.\\\\
+
+
+\begin{lstlisting}[language=Java, caption=Codice della classe DocumentSearchCriteriaBuilder]
+public class DocumentSearchCriteriaBuilder {
+    private String documentTitle;
+    private Integer authorId;
+    private DocumentFormat format;
+    private Date createdAfter;
+    private Date createdBefore;
+    private List<String> tags;
+
+    public DocumentSearchCriteriaBuilder setDocumentTitle(String documentTitle) {
+        this.documentTitle = documentTitle;
+        return this;
+    }
+    public DocumentSearchCriteriaBuilder setAuthorId(Integer authorId) {
+        this.authorId = authorId;
+        return this;
+    }
+
+    public DocumentSearchCriteriaBuilder setFormat(DocumentFormat format) {
+        this.format = format;
+        return this;
+    }
+    public DocumentSearchCriteriaBuilder setCreatedAfter(Date createdAfter) {
+        this.createdAfter = createdAfter;
+        return this;
+    }
+    public DocumentSearchCriteriaBuilder setCreatedBefore(Date createdBefore) {
+        this.createdBefore = createdBefore;
+        return this;
+    }
+    public DocumentSearchCriteriaBuilder setTags(List<String> tags) {
+        this.tags = tags;
+        return this;
+    }
+
+    private DocumentSearchCriteriaBuilder(){}
+
+    public static DocumentSearchCriteriaBuilder getInstance(){
+        return new DocumentSearchCriteriaBuilder();
+    }
+
+    public DocumentSearchCriteria build() {
+        DocumentSearchCriteria criteria = new DocumentSearchCriteria();
+        criteria.setDocumentTitle(this.documentTitle);
+        criteria.setAuthorId(this.authorId);
+        criteria.setFormat(this.format);
+        criteria.setCreatedAfter(this.createdAfter);
+        criteria.setCreatedBefore(this.createdBefore);
+        criteria.setTags(this.tags);
+        return criteria;
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Design pattern: DAO}
+L’obiettivo del pattern \textit{Data Access Object} (DAO) è separare la logica di accesso ai dati dalla logica di business, incapsulando tutte le operazioni verso il database in classi dedicate. In questo
+modo il codice applicativo non dipende da dettagli specifici di SQL, del driver JDBC o della
+struttura fisica del database, ma interagisce con un’interfaccia ad oggetti dedicata all'interazione con esso.
+
+Nel progetto ogni entità principale del dominio ha un proprio DAO dedicato, responsabile
+delle operazioni di creazione, lettura, aggiornamento e cancellazione (CRUD). Ad esempio:
+\texttt{UserDAO} si occupa della persistenza degli oggetti \texttt{User}, \texttt{DocumentDAO}
+gestisce gli oggetti \texttt{Document}, \texttt{PublishRequestDAO} le entità \texttt{PublishRequest},
+\texttt{CommentDAO} i commenti e così via. Tutte queste classi sono raccolte nel package
+\texttt{ORM}, che funge da strato di accesso ai dati dell’architettura.
+\subsection{Diagramma ER e Modello Relazionale}
+\begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/diagrammaER.png}
+        \caption{Diagramma ER}
+    \end{figure}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\linewidth]{images/modellorelazionale.png}
+        \caption{Modello relazionale}
+    \end{figure}
+\section{Implementazione delle classi}
+\subsection{Business Logic}
+\subsubsection{LoginController}
+\subsubsection{UserController}
+\subsubsection{ModeratorController}
+\subsubsection{AdminController}
+\subsubsection{RelationController}
+\subsection{Domain Model}
+\subsubsection{Document}
+\subsubsection{PublishRequest}
+\subsubsection{Collection}
+\subsubsection{Comment}
+\subsubsection{DocumentRelation}
+\subsubsection{Tag}
+\subsubsection{User}
+\subsubsection{DocumentSearchCriteria e DocumentSearchCriteriaBuilder}
+\subsection{ORM}
+\subsubsection{DBConnection}
+\subsubsection{BaseDAO}
+\subsubsection{DocumentDAO}
+\subsubsection{UserDAO}
+\subsubsection{PublishRequestDAO}
+\subsubsection{CollectionDAO}
+\subsubsection{CommentDAO}
+\subsubsection{DocumentRelationDAO}
+\section{Testing}
+\end{document}
