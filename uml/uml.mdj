@@ -51892,7 +51892,7 @@
 									"font": "Arial;15;1",
 									"parentStyle": true,
 									"left": 464,
-									"top": 125,
+									"top": 141,
 									"width": 168.37646484375,
 									"height": 15,
 									"text": "Collection"
@@ -51919,7 +51919,7 @@
 											"font": "Arial;15;0",
 											"parentStyle": true,
 											"left": 469,
-											"top": 150,
+											"top": 166,
 											"width": 158.37646484375,
 											"height": 15
 										},
@@ -51935,7 +51935,7 @@
 											"font": "Arial;15;0",
 											"parentStyle": true,
 											"left": 469,
-											"top": 167,
+											"top": 183,
 											"width": 158.37646484375,
 											"height": 15
 										},
@@ -51951,7 +51951,7 @@
 											"font": "Arial;15;0",
 											"parentStyle": true,
 											"left": 469,
-											"top": 184,
+											"top": 200,
 											"width": 158.37646484375,
 											"height": 15
 										},
@@ -51967,7 +51967,7 @@
 											"font": "Arial;15;0",
 											"parentStyle": true,
 											"left": 469,
-											"top": 201,
+											"top": 217,
 											"width": 158.37646484375,
 											"height": 15
 										}
@@ -51975,7 +51975,7 @@
 									"font": "Arial;15;0",
 									"parentStyle": true,
 									"left": 464,
-									"top": 145,
+									"top": 161,
 									"width": 168.37646484375,
 									"height": 76
 								}
@@ -51983,7 +51983,7 @@
 							"font": "Arial;15;0",
 							"parentStyle": false,
 							"left": 464,
-							"top": 120,
+							"top": 136,
 							"width": 168.37646484375,
 							"height": 101,
 							"nameLabel": {
