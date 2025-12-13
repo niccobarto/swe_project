@@ -34,7 +34,7 @@ CREATE TABLE document
     file_name     VARCHAR(255) NOT NULL,
     author_id     INTEGER      NOT NULL,
     creation_date DATE         NOT NULL,
-    period        varchar(10)  NOT NULL,
+    period        VARCHAR(10)  NOT NULL,
 
     CONSTRAINT fk_document_author
         FOREIGN KEY (author_id)
@@ -77,6 +77,7 @@ CREATE TABLE favourite_document
             REFERENCES document (id)
             ON DELETE CASCADE
 );
+
 CREATE TABLE document_collection
 (
     collection_id INTEGER NOT NULL,
@@ -94,11 +95,13 @@ CREATE TABLE document_collection
             REFERENCES document (id)
             ON DELETE CASCADE
 );
+
 CREATE TABLE tag
 (
     tag_label   VARCHAR(50) PRIMARY KEY,
     description TEXT
 );
+
 
 CREATE TABLE document_tags
 (
@@ -117,12 +120,13 @@ CREATE TABLE document_tags
             REFERENCES tag (tag_label)
             ON DELETE CASCADE
 );
+
 CREATE TABLE document_relation
 (
     source_id      INTEGER     NOT NULL,
     destination_id INTEGER     NOT NULL,
     relation_type  VARCHAR(50) NOT NULL,
-    confirmed     BOOLEAN     DEFAULT FALSE NOT NULL,
+    confirmed      BOOLEAN     NOT NULL DEFAULT FALSE,
 
     PRIMARY KEY (source_id, destination_id),
 
@@ -136,6 +140,7 @@ CREATE TABLE document_relation
             REFERENCES document (id)
             ON DELETE CASCADE
 );
+
 CREATE TABLE comment
 (
     id          SERIAL PRIMARY KEY,
@@ -154,6 +159,7 @@ CREATE TABLE comment
             REFERENCES document (id)
             ON DELETE CASCADE
 );
+
 CREATE TABLE publish_request
 (
     id                SERIAL PRIMARY KEY,
@@ -164,7 +170,6 @@ CREATE TABLE publish_request
     document_id       INTEGER     NOT NULL,
     moderator_id      INTEGER, -- può essere NULL
 
-    -- FK verso documento richiesto per pubblicazione
     CONSTRAINT fk_publish_request_document
         FOREIGN KEY (document_id)
             REFERENCES document (id)
@@ -174,4 +179,52 @@ CREATE TABLE publish_request
     CONSTRAINT fk_publish_request_moderator
         FOREIGN KEY (moderator_id)
             REFERENCES "user" (id)
+);
+
+CREATE TABLE tag_change_request
+(
+    id                 SERIAL PRIMARY KEY,
+    document_id        INTEGER     NOT NULL,
+    operation          VARCHAR(10) NOT NULL,  -- 'ADD' / 'REMOVE'
+    existing_tag_label VARCHAR(50),           -- FK nullable
+    proposed_label     VARCHAR(50),           -- nullable
+    status             VARCHAR(20) NOT NULL,  -- 'PENDING'/'APPROVED'/'REJECTED'
+    date_request       DATE        NOT NULL,
+    date_result        DATE,
+    moderator_id       INTEGER,
+
+    CONSTRAINT fk_tcr_document
+        FOREIGN KEY (document_id)
+            REFERENCES document (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_tcr_existing_tag
+        FOREIGN KEY (existing_tag_label)
+            REFERENCES tag (tag_label)
+            ON DELETE SET NULL,
+
+    CONSTRAINT fk_tcr_moderator
+        FOREIGN KEY (moderator_id)
+            REFERENCES "user" (id)
+            ON DELETE SET NULL,
+
+    -- XOR: o existing_tag_label o proposed_label
+    CONSTRAINT chk_tcr_tag_or_label
+        CHECK (
+            (existing_tag_label IS NOT NULL AND proposed_label IS NULL)
+                OR (existing_tag_label IS NULL     AND proposed_label IS NOT NULL)
+            ),
+
+    -- REMOVE richiede existing_tag_label
+    CONSTRAINT chk_tcr_remove_requires_existing_tag
+        CHECK (
+            operation <> 'REMOVE'
+                OR existing_tag_label IS NOT NULL
+            ),
+
+    CONSTRAINT chk_tcr_operation
+        CHECK (operation IN ('ADD','REMOVE')),
+
+    CONSTRAINT chk_tcr_status
+        CHECK (status IN ('PENDING','APPROVED','REJECTED'))
 );
