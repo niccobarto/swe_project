@@ -460,11 +460,25 @@ gestisce gli oggetti \texttt{Document}, \texttt{PublishRequestDAO} le entità \t
     \end{figure}
 \section{Implementazione delle classi}
 \subsection{Business Logic}
+Come definito nelle precedenti sezioni, la Business Logic è il package che espire tutte le funzionalità che ogni utente può sfruttare, esponendo metodi all'UI che utilizzano classi e funzionalità dei pakcages Domain Model e ORM.
 \subsubsection{LoginController}
+Rappresenta il primo controller con cui l'utente si espone dato che l'accesso alle funzionalità del software deve essere verificato con un'autenticazione. Presenta le funzionalità di \texttt{login} e \texttt{register}. Una volta eseguito l'accesso si passa allo UserController.
 \subsubsection{UserController}
+Espone tutte le funzionalità di cui qualsiasi utente può usufruire, come  \texttt{createDocument}, \texttt{searchDocuments}, \texttt{writeComment}. Qui l'utente può creare collezioni, aggiungere documenti ad esse, scrivere commenti sotto documenti, ricercare documenti tramite filtri e entrare nelle funzionalità di autore, creando documenti o modificando il loro stato aggiungendo tag o relazioni con altri documenti.
 \subsubsection{ModeratorController}
+Le funzionalità del moderatore sono incluse in questo controller. Qui si seleziona una particolare richiesta di pubblicazione e se ne decide l'esito, cosi come le richieste di nuovi tag o di aggiunta di tag ad un particolare documento. Troviamo una protezione all'accesso a queste funzionalità poiché sono dedicate soltanto a quegli utenti che hanno ottenuto il consenso da parte di un admin, definiti come moderatori.
 \subsubsection{AdminController}
+L'admin ha l'importante compito di mantenere un buon stato corrente del software, includendo funzionalità di ban di utenti o di eliminazioni di commenti o documenti. 
 \subsubsection{RelationController}
+La scelta di includere un controller dedicato ad una specifica funzionalità è definita dalla sua importanza e complessità, staccandolo quindi dai metodi di UserController. L'attriuto \texttt{selected} presente nel controller rappresenta il documento selezionato dall'utente per eseguire la prossima azione, che può essere:
+\begin{itemize}
+    \item ricercare quali relazioni hanno \texttt{selected} come source, specificando eventualmente il tipo di relazione che si cerca;
+    \item ricercare quali relazioni hanno \texttt{selected} come destination, specificando eventualmente il tipo di relazione che si cerca;
+    \item aggiungere una relazione che veda \texttt{selected} come source:
+    \item eliminare una relazione che veda \texttt{selected} come source;
+    \item accettare la richiesta di relazione effettuata da un'altro utente, dove \texttt{selected} è la destination della relazione;
+\end{itemize}
+
 \subsection{Domain Model}
 \subsubsection{Document}
 \subsubsection{PublishRequest}
