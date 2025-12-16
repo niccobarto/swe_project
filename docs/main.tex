@@ -87,7 +87,7 @@ I package che troviamo nell'architettura sono i seguenti:
     \item \textbf{RDBMS}:rappresenta il sistema che conserva effettivamente i dati con tabelle che rappresentano il nostro dominio, vincoli e relazioni. Nel nostro caso troviamo PostgreSQL come DBMS relazionale scelto.
 \end{itemize}
 
-Parlando invece dell'ambiente di sviluppo dell'applicazione:
+Parlando invece dell'ambiente di sviluppo dell'applicazione, i software utilizzati sono:
 \begin{itemize}
     \item \textbf{IntelliJ IDEA}: IDE predefinito per la scrittura del codice Java;
     \item \textbf{StarUML}: creazione di diagrammi UML, use case, modello ER, modello relazionale;
@@ -460,17 +460,44 @@ gestisce gli oggetti \texttt{Document}, \texttt{PublishRequestDAO} le entità \t
     \end{figure}
 \section{Implementazione delle classi}
 \subsection{Business Logic}
-Come definito nelle precedenti sezioni, la Business Logic è il package che espire tutte le funzionalità che ogni utente può sfruttare, esponendo metodi all'UI che utilizzano classi e funzionalità dei pakcages Domain Model e ORM.
+Come definito nelle sezioni precedenti, la Business Logic rappresenta il package che espone
+tutte le funzionalità utilizzabili dagli utenti del sistema. Questo livello fornisce un insieme
+di controller che mettono a disposizione dell’interfaccia utente i metodi necessari alla
+realizzazione dei casi d’uso, orchestrando le classi del Domain Model e delegando le operazioni
+di persistenza al package ORM.
+
 \subsubsection{LoginController}
-Rappresenta il primo controller con cui l'utente si espone dato che l'accesso alle funzionalità del software deve essere verificato con un'autenticazione. Presenta le funzionalità di \texttt{login} e \texttt{register}. Una volta eseguito l'accesso si passa allo UserController.
+Il \texttt{LoginController} rappresenta il primo punto di contatto tra l’utente e il sistema,
+poiché l’accesso alle funzionalità dell’applicazione è subordinato a un processo di
+autenticazione. Esso espone le operazioni di \texttt{login} e \texttt{register}, consentendo
+all’utente di autenticarsi o di creare un nuovo account. Una volta completata con successo
+l’autenticazione, il flusso applicativo viene demandato allo \texttt{UserController}.
+
 \subsubsection{UserController}
-Espone tutte le funzionalità di cui qualsiasi utente può usufruire, come  \texttt{createDocument}, \texttt{searchDocuments}, \texttt{writeComment}. Qui l'utente può creare collezioni, aggiungere documenti ad esse, scrivere commenti sotto documenti, ricercare documenti tramite filtri e entrare nelle funzionalità di autore, creando documenti o modificando il loro stato aggiungendo tag o relazioni con altri documenti.
+Lo \texttt{UserController} espone le funzionalità di base accessibili a qualsiasi utente
+autenticato. Tra queste rientrano operazioni come \texttt{createDocument},
+\texttt{searchDocuments} e \texttt{writeComment}. Attraverso questo controller l’utente può
+creare e gestire collezioni personali, aggiungere documenti alle collezioni, scrivere commenti
+sui documenti pubblici e ricercare documenti tramite filtri. Inoltre, qualora l’utente assuma
+anche il ruolo di autore, lo \texttt{UserController} consente di accedere alle funzionalità di
+creazione e modifica dei documenti, inclusa l’aggiunta di tag e la definizione di relazioni con
+altri documenti.
+
 \subsubsection{ModeratorController}
-Le funzionalità del moderatore sono incluse in questo controller. Qui si seleziona una particolare richiesta di pubblicazione e se ne decide l'esito, cosi come le richieste di nuovi tag o di aggiunta di tag ad un particolare documento. Troviamo una protezione all'accesso a queste funzionalità poiché sono dedicate soltanto a quegli utenti che hanno ottenuto il consenso da parte di un admin, definiti come moderatori.
+Il \texttt{ModeratorController} raccoglie le funzionalità riservate agli utenti con ruolo di
+moderatore. In questo contesto il moderatore può selezionare una richiesta di pubblicazione,
+visualizzarne i dettagli e determinarne l’esito, approvandola o rifiutandola. L’accesso a tali
+operazioni è protetto da controlli sui permessi, poiché le funzionalità sono disponibili
+esclusivamente agli utenti che hanno ottenuto l’abilitazione da parte di un amministratore.
+
 \subsubsection{AdminController}
-L'admin ha l'importante compito di mantenere un buon stato corrente del software, includendo funzionalità di ban di utenti o di eliminazioni di commenti o documenti. 
+L’\texttt{AdminController} fornisce le funzionalità di amministrazione globale del sistema.
+L’amministratore ha il compito di mantenere uno stato coerente e sicuro dell’applicazione,
+potendo eseguire operazioni come il ban di utenti, l’eliminazione di commenti non conformi o la
+rimozione di documenti che violano le policy della piattaforma.
+
 \subsubsection{RelationController}
-La scelta di includere un controller dedicato ad una specifica funzionalità è definita dalla sua importanza e complessità, staccandolo quindi dai metodi di UserController. L'attriuto \texttt{selected} presente nel controller rappresenta il documento selezionato dall'utente per eseguire la prossima azione, che può essere:
+La scelta di includere un controller dedicato ad una specifica funzionalità è definita dalla sua importanza e complessità, staccandolo quindi dai metodi di UserController. L'attributo \texttt{selected} presente nel controller rappresenta il documento selezionato dall'utente per eseguire la prossima azione, che può essere:
 \begin{itemize}
     \item ricercare quali relazioni hanno \texttt{selected} come source, specificando eventualmente il tipo di relazione che si cerca;
     \item ricercare quali relazioni hanno \texttt{selected} come destination, specificando eventualmente il tipo di relazione che si cerca;
@@ -480,22 +507,399 @@ La scelta di includere un controller dedicato ad una specifica funzionalità è 
 \end{itemize}
 
 \subsection{Domain Model}
+
+Il Domain Model rappresenta il nucleo concettuale dell’applicazione e descrive le entità
+fondamentali del dominio, le loro proprietà e le relazioni che intercorrono tra di esse.
+Le classi di questo package modellano i concetti chiave del sistema di gestione dei documenti
+musicali e sono utilizzate dalla Business Logic per implementare i casi d’uso, mentre la loro
+persistenza è dipende dal package ORM.
+
 \subsubsection{Document}
-\subsubsection{PublishRequest}
-\subsubsection{Collection}
-\subsubsection{Comment}
-\subsubsection{DocumentRelation}
-\subsubsection{Tag}
+La classe \texttt{Document} rappresenta l’entità centrale del dominio applicativo.
+Un documento modella un contenuto musicale caricato da un autore ed è caratterizzato da
+attributi descrittivi quali il titolo, la descrizione, il formato del file, il periodo
+storico di riferimento e la data di creazione. Ogni documento è associato a uno stato
+(\texttt{DocumentStatus}) che ne definisce il ciclo di vita, ad esempio bozza, in attesa di
+approvazione o pubblicato.
+
+Un documento è sempre associato a un autore, rappresentato da un’istanza della classe
+\texttt{User}, ed è inoltre collegabile ad altri documenti tramite relazioni.
+
 \subsubsection{User}
+La classe \texttt{User} rappresenta un utente del sistema. Essa contiene le informazioni
+necessarie all’identificazione e all’autenticazione, come nome, cognome, email e password,
+oltre a flag che indicano il ruolo dell’utente all’interno della piattaforma
+(\texttt{is\_moderator}, \texttt{is\_admin}).
+
+Un utente può assumere ruoli differenti: utente standard, autore, moderatore o admin.
+Dal punto di vista del dominio, un utente può creare documenti, scrivere commenti, gestire
+collezioni personali e interagire con i contenuti pubblicati.
+
+\subsubsection{PublishRequest}
+La classe \texttt{PublishRequest} modella il processo di richiesta di pubblicazione di un
+documento. Essa rappresenta una richiesta inviata da un autore per rendere pubblico un
+documento precedentemente creato. Ogni richiesta è associata a un singolo documento e può
+essere gestita da un moderatore.
+
+La richiesta possiede uno stato (\texttt{RequestStatus}) che ne rappresenta l’esito
+(\texttt{PENDING}, \texttt{APPROVED}, \texttt{REJECTED}), oltre a informazioni temporali
+relative alla data di invio e di valutazione. In caso di rifiuto, è possibile associare
+una motivazione testuale. Questa classe consente di mantenere traccia delle decisioni di
+moderazione e di separare chiaramente il concetto di documento da quello di pubblicazione.
+
+\subsubsection{Collection}
+La classe \texttt{Collection} rappresenta un insieme di documenti creato da un utente
+per organizzare e consultare i contenuti in modo strutturato. Ogni collezione è associata a
+un singolo utente proprietario, ma può contenere un numero arbitrario di documenti.
+
+Dal punto di vista del dominio, le collezioni permettono agli utenti di classificare i
+documenti secondo criteri personali, indipendentemente dallo stato di pubblicazione degli
+stessi. La classe espone operazioni per l’aggiunta e la rimozione di documenti, mantenendo
+coerente la relazione tra collezioni e documenti.
+
+\subsubsection{Comment}
+La classe \texttt{Comment} modella un commento testuale associato a un documento.
+Essa funge da mapper tra \texttt{User} e \texttt{Document}, collegando l’utente autore del
+commento al documento a cui il commento si riferisce. Oltre ai riferimenti alle entità
+coinvolte, il commento contiene il testo inserito dall’utente e la data di creazione.
+
+I commenti permettono l’interazione tra gli utenti e arricchiscono i documenti pubblicati
+con osservazioni, note o discussioni. La separazione del commento come entità autonoma
+consente una gestione flessibile e una possibile moderazione dei contenuti.
+
+\subsubsection{DocumentRelation}
+La classe \texttt{DocumentRelation} rappresenta una relazione semantica tra due documenti.
+Ogni relazione collega una coppia di documenti distinguendo un documento sorgente
+(\textit{source}) e uno di destinazione (\textit{destination}), ed è caratterizzata da un
+tipo di relazione (\texttt{DocumentRelationType}) e da uno stato di conferma.
+
+Un documento può essere in relazione con molti altri documenti, ma per ogni coppia specifica
+può esistere al massimo una relazione. Questa scelta progettuale consente di evitare
+duplicazioni e di mantenere una rappresentazione chiara dei collegamenti tra documenti, come
+ad esempio versioni successive, traduzioni o relazioni tematiche.
+
 \subsubsection{DocumentSearchCriteria e DocumentSearchCriteriaBuilder}
+Le classi \texttt{DocumentSearchCriteria} e \texttt{DocumentSearchCriteriaBuilder} sono
+utilizzate per modellare i criteri di ricerca dei documenti. \texttt{DocumentSearchCriteria}
+rappresenta un oggetto immutabile che raccoglie i possibili filtri applicabili a una ricerca,
+come titolo, autore, stato, formato o data di creazione.
+
+La costruzione di tale oggetto avviene tramite il pattern \textit{Builder}, implementato
+dalla classe \texttt{DocumentSearchCriteriaBuilder}. Questo approccio evita il problema dei
+cosiddetti \textit{telescoping constructors} e permette di impostare in modo chiaro e leggibile
+solo i criteri desiderati. La Business Logic utilizza il builder per creare i criteri di
+ricerca a partire dall’input dell’utente e li passa ai DAO, che si occupano di tradurli nelle
+opportune query verso il database.
+\subsubsection{Tag}
+TODO
+\subsubsection{TagChangeRequest}
+TODO
+\subsubsection{TagChangeOperation}
+TODO
 \subsection{ORM}
+Il package ORM rappresenta il livello di separazione tra i dati dell'applicazione e il suo dominio. Il suo compito è
+quello di tradurre le operazioni eseguite sugli oggetti del Domain Model in interrogazioni
+verso il database relazionale e viceversa. Le classi DAO contenute nel package rispondono alle interrogazioni istanziando classi del Domain Model, oppure aggiornando il database in base alle operazioni eseguite dall'utente. Le classi DAO citate precedentemente incapsulano l'utilizzo di JDBC.
+
 \subsubsection{DBConnection}
+La classe \texttt{DBConnection} si occupa della gestione della connessione al database ed è
+implementata secondo il pattern Singleton. Tale scelta garantisce che l’intera applicazione
+utilizzi un unico punto di accesso alla connessione, evitando la creazione incontrollata di
+connessioni multiple.
+
+La connessione viene inizializzata solo al primo utilizzo (lazy initialization) e resa
+disponibile ai DAO tramite un metodo statico.
+
+La classe implementa un attributo \texttt{enableTesting} che se \texttt{True} all'invocazione del metodo \texttt{getInstance()} restituisce la connessione ad un database parallelo a quello di produzione, adibito a testare le funzionalità del software. In questo modo priviamo il database di produzione di operazioni differenti rispetto al suo utilizzo verso l'utenza.
+
 \subsubsection{BaseDAO}
+La classe \texttt{BaseDAO} rappresenta una superclasse astratta comune a tutti i DAO del
+progetto. Essa fornisce funzionalità condivise, come l’accesso alla connessione ottenuta
+tramite \texttt{DBConnection}, e definisce una base comune per la gestione delle operazioni. Contiene un attributo \texttt{Connection connection} il cui tipo è contenuto nella libreria \texttt{java.sql} e che viene restituito dal metodo \texttt{getConnection()} ereditato da tutte le classi che estendono \texttt{BaseDAO}.
+
 \subsubsection{DocumentDAO}
+Il \texttt{DocumentDAO} è responsabile della persistenza degli oggetti \texttt{Document}.
+Espone metodi per la creazione, l’aggiornamento, l’eliminazione e il recupero dei documenti
+dal database.
+
+Un aspetto rilevante di questo DAO è la gestione delle operazioni di ricerca: il
+\texttt{DocumentDAO} riceve un’istanza di \texttt{DocumentSearchCriteria} e costruisce
+dinamicamente la query SQL applicando esclusivamente i filtri specificati. In questo modo,
+la logica di costruzione delle query rimane confinata nel livello ORM, mentre la Business
+Logic si limita a definire i criteri di ricerca desiderati.
+
+Nel codice presente in Listing \ref{addDocument} viene invece mostrato un esempio di interazione tra ORM, database e Domain Model per il metodo di creazione di un documento    .
+\begin{lstlisting}[language=Java, caption=Codice del metodo DocumentDAO.addDocument(...),label=addDocument]
+public boolean addDocument(User author,
+                            String title,
+                            String description,
+                            String documentPeriod,
+                            DocumentFormat documentFormat,
+                            String filePath,
+                            String fileName,
+                            List<String> tags){
+
+        try{
+            String query = "INSERT INTO document (file_name,description,status,period,file_format,file_path,author_id,creation_date,title) VALUES(?,?,?,?,?,?,?,?,?)";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, fileName);
+            statement.setString(2, description);
+            statement.setString(3,DocumentStatus.DRAFT.toString());
+            statement.setString(4,documentPeriod);
+            statement.setString(5,documentFormat.toString());
+            statement.setString(6,filePath);
+            statement.setInt(7,author.getId());
+            statement.setDate(8, java.sql.Date.valueOf(java.time.LocalDate.now()));
+            statement.setString(9, title);
+            statement.executeUpdate();
+            statement.close();
+            return true;
+        }catch(SQLException e){
+            LOGGER.log(Level.SEVERE, "Errore durante addDocument(authorId=" + (author!=null?author.getId():null) + ")", e);
+            return false;
+        }
+    }
+
+\end{lstlisting}
 \subsubsection{UserDAO}
+Il \texttt{UserDAO} gestisce la persistenza della classe \texttt{User}. Fornisce operazioni
+per la creazione di nuovi utenti, la ricerca di utenti esistenti e l’aggiornamento delle
+informazioni associate a un profilo.
+
+Questo DAO è utilizzato sia durante le operazioni di autenticazione e registrazione, sia
+nelle funzionalità amministrative che richiedono la gestione degli utenti, come la
+promozione a moderatore o l’eventuale rimozione di un account. Quando l'utente manipola le proprie collezioni o i propri preferiti il flusso di esecuzione accede a questa classe, che richiama altre classi DAO quando necessario. 
+
 \subsubsection{PublishRequestDAO}
+La classe \texttt{PublishRequestDAO} si occupa della gestione delle richieste di pubblicazione
+rappresentate dalla classe \texttt{PublishRequest}. Esso fornisce metodi per la creazione
+di nuove richieste, il recupero delle richieste in attesa e l’aggiornamento dello stato a
+seguito della valutazione da parte di un moderatore.
+
+Grazie a questo DAO, il processo di pubblicazione dei documenti risulta separato dalla
+gestione dei documenti stessi, permettendo di mantenere traccia delle decisioni di
+moderazione e dello storico delle richieste.
 \subsubsection{CollectionDAO}
+Il \texttt{CollectionDAO} è responsabile della gestione delle collezioni di documenti.
+Gestisce la creazione e la modifica delle collezioni, nonché l’associazione e la
+disassociazione dei documenti alle collezioni tramite le opportune tabelle di collegamento.
+
 \subsubsection{CommentDAO}
+\texttt{CommentDAO} controlla le funzionalità dei commenti associati ai documenti. Espone
+metodi per l’aggiunta di nuovi commenti, il recupero dei commenti relativi a un determinato
+documento o a un determinato utente e la loro eventuale rimozione
 \subsubsection{DocumentRelationDAO}
+Il \texttt{DocumentRelationDAO} si occupa della gestione delle relazioni tra documenti
+rappresentate dalla classe \texttt{DocumentRelation}. Fornisce operazioni per la creazione,
+la ricerca e la rimozione delle relazioni, nonché per l’aggiornamento del loro stato di
+conferma.
+
+Questo DAO garantisce che, per ogni coppia di documenti, possa esistere al massimo una
+relazione, in accordo con i vincoli definiti nel modello relazionale. La separazione di
+questa logica in un DAO dedicato consente di mantenere chiara e coerente la gestione dei
+collegamenti semantici tra i documenti.
+\subsubsection{TagDAO}
+TODO
+\subsubsection{TagChangeRequestDAO}
+TODO
 \section{Testing}
+Per verificare la correttezza del codice e del flusso di esecuzione delle funzionalità, è ragionevole definire delle classi adibite al testing. Tramite la libreria \textbf{JUnit}, sono stati definiti tre livelli di test:
+\begin{itemize}
+    \item Testing per la \textbf{Business Logic}, dove si verificano i metodi di ogni controller considerando esiti positivi e negativi di ogni funzionalità. 
+    \item Testing del \textbf{Domain Model}, ristretto soltanto alla classe \texttt{DocumentSearchCriteriaBuilder} poiché l'unica ad implementare delle funzionalità a livello di dominio differenti da getter e setter.
+    \item Testing per l'\textbf{ORM}, dove si interagisce con il database seguendo i metodi delle classi DAO e se ne verifica successivamente lo stato e le tuple aggiunte, rimosse o modificate.
+\end{itemize}
+
+Come riportato nella sezione precedente, il database di produzione non subisce nessuna interazione con queste classi. E' il database creato appositamente per il testing a ricevere le query dei metodi.
+
+Per ogni livello di testing verranno riportati degli esempi, per poi mostrare l'esito di tutti tramite immagini.
+\subsection{Test Business Logic}
+
+Nel Listing \ref{testbusinessadddocument} troviamo il codice che testa la creazione di un nuovo documento:
+
+\begin{lstlisting}[language=Java, caption=Codice del testing di addDocument() ,label=testbusinessadddocument]
+    @Test
+    void createDocument() {
+        // crea documento con titolo
+        controller.createDocument("MyDoc", "desc", "1900-1950", DocumentFormat.PDF, List.of("a", "b"));
+        List<Document> docs = documentDAO.getDocumentsByAuthor(currentUser.getId());
+        assertFalse(docs.isEmpty());
+        assertEquals("MyDoc", docs.get(0).getTitle());
+
+        // incrementa nextFileName
+        int prev = currentUser.getNextFileName();
+        controller.createDocument("T", "d", "1900", DocumentFormat.PDF, List.of("t"));
+        assertEquals(prev + 1, currentUser.getNextFileName());
+
+        // input non validi non devono lanciare eccezioni
+        assertDoesNotThrow(() -> controller.createDocument(null, "d", "1900", DocumentFormat.PDF, List.of("t")));
+        assertDoesNotThrow(() -> controller.createDocument("Doc", null, "1900", DocumentFormat.PDF, List.of("t")));
+        assertDoesNotThrow(() -> controller.createDocument("Doc", "d", null, DocumentFormat.PDF, List.of("t")));
+        assertDoesNotThrow(() -> controller.createDocument("Doc", "d", "1900", null, List.of("t")));
+    }
+\end{lstlisting}
+
+Mentre nel Listing \ref{testbusinessmanagereuqest} è presente il test per l'aggiornamento dello status di una \texttt{PublishRequest} da parte di un moderatore:
+
+\begin{lstlisting}[language=Java, caption=Codice del testing di addDocument() ,label=testbusinessmanagereuqest]
+    @Test
+    void updateDocumentStatus_positive_and_negative_and_auth() {
+        // POSITIVO: crea doc + richiesta pendente, approva tramite moderatorController
+        documentDAO.addDocument(normalUser, "P", "d", "2000", DocumentFormat.PDF, "fp", "fn", List.of("t"));
+        int docId = documentDAO.getDocumentsByAuthor(normalUser.getId()).get(0).getId();
+        publishRequestDAO.addRequest(documentDAO.getDocumentById(docId));
+
+        moderatorController.updateDocumentStatus(docId, RequestStatus.APPROVED);
+
+        // il documento deve essere pubblicato
+        Document published = documentDAO.getDocumentById(docId);
+        assertNotNull(published);
+        assertEquals(DocumentStatus.PUBLISHED, published.getStatus());
+
+        // la richiesta deve risultare APPROVED
+        List<PublishRequest> approvedReqs = publishRequestDAO.getRequestsByStatus(RequestStatus.APPROVED);
+        assertTrue(approvedReqs.stream().anyMatch(r -> r.getDocument() != null && r.getDocument().getId() == docId));
+
+        // NEGATIVO: documento senza richiesta pendente -> non cambia lo status
+        documentDAO.addDocument(normalUser, "NoPending", "d", "2001", DocumentFormat.TXT, "fp", "fn2", List.of("t"));
+        int docNoPending = documentDAO.getDocumentsByAuthor(normalUser.getId()).get(0).getId();
+        // non aggiungiamo publishRequest
+        moderatorController.updateDocumentStatus(docNoPending, RequestStatus.APPROVED);
+        Document notChanged = documentDAO.getDocumentById(docNoPending);
+        assertNotNull(notChanged);
+        assertEquals(DocumentStatus.DRAFT, notChanged.getStatus());
+
+        // AUTH: utente non moderatore prova ad approvare -> non deve cambiare lo stato
+        ModeratorController nonMod = new ModeratorController(normalUser);
+        // crea doc+request per testare l'accesso negato
+        documentDAO.addDocument(normalUser, "AuthTest", "d", "2002", DocumentFormat.PDF, "fp", "fn3", List.of("t"));
+        int docAuth = documentDAO.getDocumentsByAuthor(normalUser.getId()).get(0).getId();
+        publishRequestDAO.addRequest(documentDAO.getDocumentById(docAuth));
+        nonMod.updateDocumentStatus(docAuth, RequestStatus.REJECTED);
+
+        // essendo non moderatore lo status della richiesta rimane PENDING e il documento resta DRAFT
+        List<PublishRequest> pending = publishRequestDAO.getRequestsByStatus(RequestStatus.PENDING);
+        assertTrue(pending.stream().anyMatch(r -> r.getDocument() != null && r.getDocument().getId() == docAuth));
+        assertEquals(DocumentStatus.PENDING, documentDAO.getDocumentById(docAuth).getStatus());
+    }
+\end{lstlisting}
+
+
+ \begin{figure}[H]
+     \centering
+     \includegraphics[width=0.4\linewidth]{images/businesslogictest1.png}
+     \label{fig:placeholder}
+     \caption{I test di AdminController e RelationController}
+ \end{figure}
+\begin{figure}[H]
+     \centering
+     \includegraphics[width=0.4\linewidth]{images/businesslogictest2.png}
+     \label{fig:placeholder}
+     \caption{I test di UserController, ModeratorController e LoginController}
+ \end{figure}
+ 
+\subsection{Test Domain Model}
+Come già detto, nel package Domain Model la maggior parte delle classi contiene solo metodi getter e setter. Questo perché in questo layer si depositano solo le funzionalità di dominio, che dipende dalla natura del software e del contesto rappresentato da esso. In questo caso quindi solo \texttt{DocumentSearchCriteriaBuilder} incorpora funzionalità di dominio da dover testare:
+
+\begin{lstlisting}[language=Java, caption=Codice del testing DocumentSearchCriteriaBuilder.build()) ,label=testdomainmodel]
+@Test
+    // Verifica che, quando si impostano tutti i campi, il criterio risultante contenga
+    // i valori corrispondenti e che venga fatta una copia difensiva della lista dei tag.
+    void buildAllFields() {
+        Date after = new Date(1000L);
+        Date before = new Date(2000L);
+        List<String> tags = new ArrayList<>(Arrays.asList("tag1", "tag2"));
+
+        DocumentSearchCriteria criteria = DocumentSearchCriteriaBuilder.getInstance()
+                .setDocumentTitle("My doc")
+                .setAuthorId(5)
+                .setFormat(DocumentFormat.PDF)
+                .setCreatedAfter(after)
+                .setCreatedBefore(before)
+                .setTags(tags)
+                .build();
+
+        assertTrue(criteria.getDocumentTitle().isPresent());
+        assertEquals("My doc", criteria.getDocumentTitle().get());
+
+        assertTrue(criteria.getAuthorId().isPresent());
+        assertEquals(5, criteria.getAuthorId().get());
+
+        assertTrue(criteria.getFormat().isPresent());
+        assertEquals(DocumentFormat.PDF, criteria.getFormat().get());
+
+        assertTrue(criteria.getCreatedAfter().isPresent());
+        assertEquals(after, criteria.getCreatedAfter().get());
+
+        assertTrue(criteria.getCreatedBefore().isPresent());
+        assertEquals(before, criteria.getCreatedBefore().get());
+
+        assertTrue(criteria.getTags().isPresent());
+        assertEquals(2, criteria.getTags().get().size());
+        assertEquals(Arrays.asList("tag1", "tag2"), criteria.getTags().get());
+
+        // ensure defensive copy: modifying original list does not affect criteria
+        tags.add("newtag");
+        assertEquals(2, criteria.getTags().get().size());
+    }
+
+    @Test
+    // Verifica che, se non si impostano campi, il criterio restituisca Optionals vuoti
+    void buildNoFields() {
+        DocumentSearchCriteria criteria = DocumentSearchCriteriaBuilder.getInstance()
+                .build();
+
+        assertFalse(criteria.getDocumentTitle().isPresent());
+        assertFalse(criteria.getAuthorId().isPresent());
+        assertFalse(criteria.getFormat().isPresent());
+        assertFalse(criteria.getCreatedAfter().isPresent());
+        assertFalse(criteria.getCreatedBefore().isPresent());
+        assertFalse(criteria.getTags().isPresent());
+    }
+\end{lstlisting}
+
+E vengono riportati gli esiti:
+\begin{figure}[H]
+     \centering
+     \includegraphics[width=0.7\linewidth]{images/domainmodeltest.png}
+     \label{fig:placeholder}
+     \caption{I test di DocumentSearchCriteriaBuilder}
+ \end{figure}
+\subsection{Test ORM}
+Nel Listing \ref{testorm11} è presente il codice di testing per la funzionalità di aggiunta e rimozione di una relazione tra due documenti. Il testing viene fatto a livello di operazione CRUD a database
+
+\begin{lstlisting}[language=Java, caption=Codice del testing  ,label=testorm11]
+@Test
+    void addAndRemoveDocumentRelation() {
+        // ensure no relation
+        assertEquals(0, countRelationRows(srcDocId, dstDocId));
+
+        relationDAO.addDocumentRelation(srcDocId, dstDocId, DocumentRelationType.QUOTE, false);
+        assertEquals(1, countRelationRows(srcDocId, dstDocId));
+
+        relationDAO.removeDocumentRelation(srcDocId, dstDocId);
+        assertEquals(0, countRelationRows(srcDocId, dstDocId));
+    }
+\end{lstlisting}
+
+Nelle immagini successive vengono mostrati tutti i test ed esiti delle classi del package ORM:
+
+\begin{figure}[H]
+     \centering
+     \includegraphics[width=0.8\linewidth]{images/testorm1.png}
+     \label{fig:placeholder}
+     \caption{I test PublishRequestDAO, TagChangeRequestDAO, TagDAO}
+ \end{figure}
+ \begin{figure}[H]
+     \centering
+     \includegraphics[width=0.8\linewidth]{images/testorm2.png}
+     \label{fig:placeholder}
+     \caption{I test di DocumentDAO, CollectionDAO, CommentDAO}
+ \end{figure}
+ \begin{figure}[H]
+     \centering
+     \includegraphics[width=0.8\linewidth]{images/testorm3.png}
+     \label{fig:placeholder}
+     \caption{I test di UserDAO e DocumentRelationDAO}
+ \end{figure}
 \end{document}
