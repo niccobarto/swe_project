@@ -70,7 +70,7 @@
 \subsection{Descrizione del progetto}
 Questa relazione ha lo scopo di definire e spiegare i punti chiave relativi alla progettazione di un software Java ideato per la pubblicazione e manutenzione di documenti musicali. L'obiettivo principale è quello di garantire l'affidabilità e autenticità dei documenti per la corretta manutenibilità culturale. Questo tramite moderatori che hanno conoscenza riguardo l'arte con il ruolo di approvare i documenti pubblicati da un Autore; un documento si considera pubblico solo dopo tale conferma. Un utente autenticato potrà quindi visualizzare i documenti pubblici tramite una ricerca legata a vari parametri, aprire il documento, commentarlo o interagirci inserendolo in specifiche collezioni private. Il ruolo dell'admin è quello di un super-utente, che cioè amministra le funzionalità degli utenti e delle funzionalità associate. 
 \subsection{Struttura del progetto e ambiente di sviluppo}
-Il progetto si compone in diversi package per permettere modularità e singola responsabilità. La suddivisione in livelli consente di ottenere alta modularità, mantenibilità e separazione delle responsabilità. Ogni layer presenta un grado diverso di astrazione, riducendo le dipendenze e facilitando l’evoluzione del software.
+Il progetto si compone in diversi package per permettere modularità e singola responsabilità. Ogni layer presenta un grado diverso di astrazione, riducendo le dipendenze e facilitando l’evoluzione del software.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{images/project_structure.png}
@@ -119,10 +119,10 @@ Di seguito sono presentati i tre diagrammi dei casi d’uso, uno per ciascuna ca
 \end{figure}
 
 \subsubsection{Utente predefinito}
-L’utente predefinito è un soggetto autenticato che può accedere alle funzionalità del sistema adibite alla consultazione dei documenti pubblicati e la ricerca filtrata. Può rilasciare commenti sotto uno specifico documento che sarà pubblico a tutti gli altri utenti del sistema, che siano con stesso livello di accesso o moderatori/admin. Può organizzare documenti in collezioni o spuntarli come preferito.
+L’utente predefinito è un soggetto autenticato che può accedere alle funzionalità del sistema adibite alla consultazione dei documenti pubblicati e la ricerca filtrata. Può rilasciare commenti sotto uno specifico documento che sarà pubblico a tutti gli altri utenti del sistema, che siano con stesso livello di accesso o moderatori/admin. Può organizzare documenti in collezioni o spuntarli come preferiti.
 \subsubsection{Autore}
 L’Autore è un utente autenticato che può creare, modificare e gestire i propri documenti. Qualsiasi utente ha la possibilità di pubblicare documenti, pertanto Autore viene considerato un tipo specifico di Utente. È la figura centrale nella produzione di contenuti:
-può caricare nuovi documenti, etichettarli con tag, organizzarli in collezioni, e soprattutto inviare una richiesta di pubblicazione, che verrà valutata dai Moderatori. Definisce relazioni tra documenti di propria proprietà ed altrui, ovvero collegamenti significativi che definiscono una rete. Gestisce le richieste di relazione che riguardano i propri documenti pubblicati. 
+può caricare nuovi documenti, etichettarli con tag, organizzarli in collezioni, e soprattutto inviare una richiesta di pubblicazione, che verrà valutata dai Moderatori. Definisce relazioni tra documenti di propria proprietà ed altrui, ovvero collegamenti significativi a cui viene associato un significato, come "una nuova versione" oppure "trascrizione", e che unite definiscono una rete che lega documenti ad altri. Gestisce le richieste di relazione che riguardano i propri documenti pubblicati.
 
 %TABELLA USE CASE 1
 \begin{table}[H]
@@ -143,7 +143,7 @@ L’utente è in grado di creare documenti di un certo formato caricandone il co
     \item Clicca il pulsante di creazione documento.
     \item Il sistema genera automaticamente i campi \texttt{file\_path} e \texttt{file\_name}, necessari al salvataggio.
     \item La creazione del documento avviene correttamente.
-\end{enumerate} \\ 
+\end{enumerate} \\
 \hline
 \textbf{Flusso alternativo} &
 \begin{itemize}
@@ -151,7 +151,7 @@ L’utente è in grado di creare documenti di un certo formato caricandone il co
 \end{itemize} \\
 \hline
 \textbf{Post-condizioni} &
-Ora l’utente possiede un documento associato al proprio profilo come autore.  
+Ora l’utente possiede un documento associato al proprio profilo come autore.
 Può richiedere la pubblicazione oppure modificarlo. \\
 \hline
 \end{tabular}
@@ -168,27 +168,40 @@ Può richiedere la pubblicazione oppure modificarlo. \\
 \textbf{Use Case 2} & \textbf{Aggiungere tag a documento} \\
 \hline
 \textbf{Descrizione use case} &
-Todo \\
+L’autore può richiedere l’aggiunta di un tag a un proprio documento.
+L’operazione genera sempre una richiesta di modifica dei tag, che dovrà
+essere valutata e approvata da un moderatore prima che il tag diventi
+effettivamente visibile sul documento. \\
 \hline
-\textbf{Attori coinvolti} & Utente (Autore) \\
+\textbf{Attori coinvolti} &
+Utente (Autore), Moderatore \\
 \hline
 \textbf{Flusso base} &
 \begin{enumerate}
-    \item Todo
-    \item
-    \item
-\end{enumerate} \\ 
+    \item L’autore seleziona un proprio documento.
+    \item Inserisce il nome del tag da aggiungere.
+    \item Il sistema verifica se il tag esiste già nel catalogo dei tag.
+    \item In entrambi i casi, il sistema crea una richiesta di modifica dei tag
+    associata al documento.
+    \item La richiesta viene registrata con stato \texttt{PENDING}.
+    \item Un moderatore visualizza la richiesta e ne valuta l’approvazione.
+\end{enumerate} \\
 \hline
 \textbf{Flusso alternativo} &
 \begin{itemize}
-    \item Todo
+    \item Se esiste già una richiesta pendente per lo stesso documento e lo stesso tag,
+    il sistema blocca la creazione di richieste duplicate.
+    \item Se l’utente non è l’autore del documento, l’operazione viene negata.
 \end{itemize} \\
 \hline
 \textbf{Post-condizioni} &
-Todo \\
+\begin{itemize}
+    \item In caso di approvazione, il tag viene associato al documento e reso pubblico.
+    \item In caso di rifiuto, il documento rimane invariato.
+\end{itemize} \\
 \hline
 \end{tabular}
-\caption{Template di descrizione del caso d'uso "Aggiunta tag a documento"}
+\caption{Template di descrizione del caso d'uso "Aggiungere tag a documento"}
 \end{table}
 
 %TABELLA USE CASE 3
@@ -201,7 +214,7 @@ Todo \\
 \hline
 \textbf{Descrizione use case} &
 Un autore può definire una relazione tra due documenti pubblicati, scegliendo il tipo di relazione
-(e.g. \texttt{NEW\_VERSION\_OF}).  
+(e.g. \texttt{NEW\_VERSION\_OF}).
 La relazione diviene visibile a tutti solo dopo l'accettazione da parte dell’autore del documento di destinazione. \\
 \hline
 \textbf{Attori coinvolti} &
@@ -209,9 +222,9 @@ Utente mittente, Utente destinatario \\
 \hline
 \textbf{Flusso base} &
 \begin{enumerate}
-    \item L’utente mittente seleziona un proprio documento pubblicato.
-    \item Seleziona un secondo documento, che può appartenere a sé stesso oppure a un altro autore.
-    \item Sceglie il tipo di relazione da creare e indica quale documento funge da \textit{source} e quale da \textit{destination}.
+    \item L’utente mittente seleziona un proprio documento pubblicato, che sarà il \emph{source}.
+    \item Seleziona un secondo documento, che può appartenere a sé stesso oppure a un altro autore, che rappresenta il \emph{destination}.
+    \item Sceglie il tipo di relazione tra \textit{source} e \textit{destination}.
     \item Il sistema registra la relazione come “in attesa di accettazione”.
     \item L’autore del documento di destinazione visualizza la richiesta di relazione.
     \item L’utente destinatario accetta la relazione, che diviene pubblica e accessibile a tutti gli utenti.
@@ -243,7 +256,7 @@ Il Moderatore ha il compito di garantire la qualità dei documenti pubblicati. P
 \small
 \begin{tabular}{|p{5cm}|p{9cm}|}
 \hline
-\textbf{Use Case 4} & \textbf{Gestire richiesta pubblicazione} \\
+\textbf{Use Case 4} & \textbf{Gestire richiesta pubblicazione documento} \\
 \hline
 \textbf{Descrizione use case} &
 Il moderatore analizza una richiesta di pubblicazione relativa a un documento caricato da un autore,
@@ -258,12 +271,12 @@ Moderatore \\
     \item Seleziona una richiesta e visualizza il documento, i suoi metadati e le informazioni fornite dall’autore.
     \item Valuta il contenuto e decide se approvare o rifiutare la richiesta.
     \item In caso di approvazione, il sistema imposta lo stato del documento a \texttt{APPROVED} e lo rende pubblico.
-    \item In caso di rifiuto, il sistema imposta lo stato a \texttt{REJECTED} e permette al moderatore di inserire una motivazione.
     \item La richiesta viene marcata come chiusa.
 \end{enumerate} \\
 \hline
 \textbf{Flusso alternativo} &
 \begin{itemize}
+    \item In caso di rifiuto, il sistema imposta lo stato a \texttt{REJECTED} e permette al moderatore di inserire una motivazione.
     \item Se l’utente che tenta la valutazione non è un moderatore (o admin), l’operazione viene bloccata.
     \item Il documento deve trovarsi in stato \texttt{DRAFT} prima della valutazione: in caso contrario la richiesta è invalida.
 \end{itemize} \\
@@ -320,7 +333,72 @@ e mantenendo conforme lo spazio di discussione. \\
 \caption{Template di descrizione del caso d'uso "Eliminazione di un commento"}
 \end{table}
 \subsection{Mockups}
-Le seguenti immagini ritraggono i mockup per gli use case considerati negli use case templates riportati precedentemente:
+Poiché l’interfaccia grafica non è stata implementata direttamente nel progetto, sono stati
+realizzati dei mockup ad alta fedeltà con lo scopo di rappresentare in modo chiaro
+le principali interazioni tra utente e sistema.
+
+I mockup permettono di visualizzare il flusso dei casi d’uso descritti nei paragrafi precedenti,
+mostrando come le funzionalità di creazione documenti, gestione dei tag, moderazione dei contenuti
+e amministrazione degli utenti siano esposte all’utente finale in modo intuitivo e coerente.
+
+In particolare:
+\begin{itemize}
+    \item la creazione di un documento evidenzia la distinzione tra salvataggio in bozza e richiesta di pubblicazione;
+    \item l’aggiunta dei tag segue un workflow controllato, basato su richieste di approvazione;
+    \item il moderatore dispone di pannelli dedicati per la gestione delle richieste pendenti;
+    \item l’amministratore può intervenire sugli utenti e sui commenti per garantire il corretto utilizzo della piattaforma.
+\end{itemize}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\linewidth]{images/addDocument.png}
+\caption{Mockup: creazione di un nuovo documento}
+\label{fig:mockup-add-document}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.80\linewidth]{images/addTag.png}
+\caption{Mockup: aggiunta di un tag a un documento}
+\label{fig:mockup-add-tag}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.80\linewidth]{images/createDocumentRelationship.png}
+    \caption{Mockup: creazione di una relazione tra documenti}
+    \label{fig:mockup-document-relationship}
+\end{figure}
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.8\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/viewPublishRequests.png}
+    \caption{Richieste di pubblicazione}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.8\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/viewTagRequest.png}
+    \caption{Richieste di modifica dei tag}
+\end{subfigure}
+\caption{Mockup: pannello di moderazione delle richieste}
+\label{fig:mockup-moderator-requests}
+\end{figure}
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.8\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/adminPanel.png}
+    \caption{Pannello di amministrazione}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.8\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{images/deleteComment.png}
+    \caption{Eliminazione di un commento}
+\end{subfigure}
+\caption{Mockup: funzionalità amministrative}
+\label{fig:mockup-admin}
+\end{figure}
 \subsection{Class diagram}
 Il diagramma delle classi fornisce una visuale dell’architettura del sistema, descrivendo le principali classi coinvolte, i loro attributi, le funzioni che forniscono e le relazioni che intercorrono tra di esse. Rispetto alla sola suddivisione in package presentata in precedenza, il class diagram consente di evidenziare in modo più preciso le responsabilità di ciascuna classe.
 
@@ -349,14 +427,14 @@ Le classi sono organizzate nei tre package principali:
 \end{itemize}
 
 \subsubsection{Design pattern: Singleton}
-Considerando che ogni classe DAO presente nel package ORM per funzionare deve ottenere una connessione al database, si vuole definire un meccanismo che permetta di centralizzare questo processo. La classe \texttt{DBConnection} implementa il pattern creazionale \textbf{Signleton}, utilizzato per la garanzia di un'unica istanza di connessione al database.
+Considerando che ogni classe DAO presente nel package ORM per funzionare deve ottenere una connessione al database, si vuole definire un meccanismo che permetta di centralizzare questo processo. La classe \texttt{DBConnection} implementa il pattern creazionale \textbf{Signleton}, utilizzato per la garanzia dell'esistenza di un'unica istanza di connessione al database.
 
 Il costrurrore della classe è dichiarato \texttt{private}, impedendo la creazione di oggetti tramite il costruttore. L'accesso alla connessione avviene esclusivamente attraverso il metodo \texttt{getConnection()} della classe astratta \texttt{BaseDAO}, estesa da tutte le classi DAO, che istanzia la connessione al database chiamando il metodo statico \texttt{getInstance()} di \texttt{DBConnection}. Tale metodo richiama il costruttore privato solamente al primo utilizzo, ritornando l'istanza appena creata oppure la cui creazione era avvenuta in invocazioni precedenti.
 
 
 
 \subsubsection{Design pattern: Mapper}
-Prendendo la classe \texttt{Comment} nel \textbf{Domain Model}, non rappresenta di per se un'entità autonoma, ma collegata direttamente al documento a cui è riferita e all'utente autore del commento. Il suo ruolo principale quindi è quello di \textbf{mappare} la relazione tra \texttt{User} e \texttt{Document}, aggiungendo come informazione il testo di tale commento.
+Prendendo la classe \texttt{Comment} nel \textbf{Domain Model}, non rappresenta di per se un'entità autonoma, ma collegata direttamente al documento a cui è riferita e all'utente autore del commento. Il suo ruolo principale, quindi, è quello di \textbf{mappare} la relazione tra \texttt{User} e \texttt{Document}, aggiungendo come informazione il testo di tale commento.
 
 Tale design pattern viene chiamato \textbf{Mapper}. Anche alla classe \texttt{DocumentRelation} associamo le stesse caratteristiche, collegando due istanze di \texttt{Document} e includendo il tipo di relazione che c'è nella coppia.
 \begin{figure}[H]
@@ -368,7 +446,7 @@ Tale design pattern viene chiamato \textbf{Mapper}. Anche alla classe \texttt{Do
 
 La classe \texttt{DocumentSearchCriteria} è stata introdotta per rappresentare in modo
 compatto i possibili filtri di ricerca sui documenti, come il titolo, l'autore, lo stato del documento, il formato, la data di creazione e l’insieme di tag
-associati. Poiché è presente un vasto spazio dei parametri possibili e non tutti possono essere utilizzati nella stessa ricerca, è necessario definire un meccanismo che ci distanzi dall'implementazione di numerosi costruttori per considerare ogni possibile gruppo di parametri, un problema denominato \textit{telescoping constructor}.
+associati. Poiché è presente un vasto spazio dei parametri possibili e non tutti potrebbero essere utilizzati nella stessa ricerca, è necessario definire un meccanismo che ci distanzi dall'implementazione di numerosi costruttori per considerare ogni possibile gruppo di parametri, un problema denominato \textit{telescoping constructor}.
 
 Per evitare questo problema è stato adottato il pattern \textit{Builder}. La classe
 \texttt{DocumentSe\-archCriteriaBuilder} funge da costruttore dedicato: essa espone metodi
@@ -445,7 +523,7 @@ Nel progetto ogni entità principale del dominio ha un proprio DAO dedicato, res
 delle operazioni di creazione, lettura, aggiornamento e cancellazione (CRUD). Ad esempio:
 \texttt{UserDAO} si occupa della persistenza degli oggetti \texttt{User}, \texttt{DocumentDAO}
 gestisce gli oggetti \texttt{Document}, \texttt{PublishRequestDAO} le entità \texttt{PublishRequest},
-\texttt{CommentDAO} i commenti e così via. Tutte queste classi sono raccolte nel package
+\texttt{CommentDAO} i commenti. Tutte queste classi sono raccolte nel package
 \texttt{ORM}, che funge da strato di accesso ai dati dell’architettura.
 \subsection{Diagramma ER e Modello Relazionale}
     \begin{figure}[H]
@@ -485,16 +563,15 @@ altri documenti.
 
 \subsubsection{ModeratorController}
 Il \texttt{ModeratorController} raccoglie le funzionalità riservate agli utenti con ruolo di
-moderatore. In questo contesto il moderatore può selezionare una richiesta di pubblicazione,
-visualizzarne i dettagli e determinarne l’esito, approvandola o rifiutandola. L’accesso a tali
+moderatore. In questo contesto il moderatore può selezionare una richiesta, che può riguardare la pubblicazione di un documento o la modifica di un tag dello stesso,
+visualizzandone i dettagli e determinarne l’esito, approvandola o rifiutandola. L’accesso a tali
 operazioni è protetto da controlli sui permessi, poiché le funzionalità sono disponibili
 esclusivamente agli utenti che hanno ottenuto l’abilitazione da parte di un amministratore.
 
 \subsubsection{AdminController}
-L’\texttt{AdminController} fornisce le funzionalità di amministrazione globale del sistema.
-L’amministratore ha il compito di mantenere uno stato coerente e sicuro dell’applicazione,
-potendo eseguire operazioni come il ban di utenti, l’eliminazione di commenti non conformi o la
-rimozione di documenti che violano le policy della piattaforma.
+L’\texttt{AdminController} fornisce le funzionalità amministrative e di supervisione del sistema, accessibili solo agli utenti con privilegio \texttt{admin}.
+Centralizza il controllo dei permessi tramite \texttt{ensureAdmin()}, e usa i DAO per operazioni di consultazione e gestione su utenti, documenti, collezioni e commenti (es. rimozione commenti, eliminazione collezioni, assegnazione ruolo moderatore).
+Include anche funzioni di report/consultazione come l’elenco documenti per autore o per stato e la consultazione dei documenti approvati da uno specifico moderatore.
 
 \subsubsection{RelationController}
 La scelta di includere un controller dedicato ad una specifica funzionalità è definita dalla sua importanza e complessità, staccandolo quindi dai metodi di UserController. L'attributo \texttt{selected} presente nel controller rappresenta il documento selezionato dall'utente per eseguire la prossima azione, che può essere:
@@ -512,7 +589,7 @@ Il Domain Model rappresenta il nucleo concettuale dell’applicazione e descrive
 fondamentali del dominio, le loro proprietà e le relazioni che intercorrono tra di esse.
 Le classi di questo package modellano i concetti chiave del sistema di gestione dei documenti
 musicali e sono utilizzate dalla Business Logic per implementare i casi d’uso, mentre la loro
-persistenza è dipende dal package ORM.
+persistenza è dipendente dal package ORM.
 
 \subsubsection{Document}
 La classe \texttt{Document} rappresenta l’entità centrale del dominio applicativo.
@@ -554,8 +631,7 @@ un singolo utente proprietario, ma può contenere un numero arbitrario di docume
 
 Dal punto di vista del dominio, le collezioni permettono agli utenti di classificare i
 documenti secondo criteri personali, indipendentemente dallo stato di pubblicazione degli
-stessi. La classe espone operazioni per l’aggiunta e la rimozione di documenti, mantenendo
-coerente la relazione tra collezioni e documenti.
+stessi.
 
 \subsubsection{Comment}
 La classe \texttt{Comment} modella un commento testuale associato a un documento.
@@ -582,7 +658,7 @@ ad esempio versioni successive, traduzioni o relazioni tematiche.
 Le classi \texttt{DocumentSearchCriteria} e \texttt{DocumentSearchCriteriaBuilder} sono
 utilizzate per modellare i criteri di ricerca dei documenti. \texttt{DocumentSearchCriteria}
 rappresenta un oggetto immutabile che raccoglie i possibili filtri applicabili a una ricerca,
-come titolo, autore, stato, formato o data di creazione.
+come titolo, autore, formato o data di creazione.
 
 La costruzione di tale oggetto avviene tramite il pattern \textit{Builder}, implementato
 dalla classe \texttt{DocumentSearchCriteriaBuilder}. Questo approccio evita il problema dei
@@ -591,11 +667,23 @@ solo i criteri desiderati. La Business Logic utilizza il builder per creare i cr
 ricerca a partire dall’input dell’utente e li passa ai DAO, che si occupano di tradurli nelle
 opportune query verso il database.
 \subsubsection{Tag}
-TODO
+La classe \texttt{Tag} rappresenta un’etichetta riutilizzabile, utilizzata per categorizzare i documenti.
+I tag consentono una classificazione trasversale dei contenuti e supportano la ricerca filtrata.
 \subsubsection{TagChangeRequest}
-TODO
-\subsubsection{TagChangeOperation}
-TODO
+
+La classe \texttt{TagChangeRequest} rappresenta una richiesta di modifica dei tag associati a un documento.
+Essa consente a un autore di proporre l’aggiunta o la rimozione di un tag, demandando la decisione finale a un
+moderatore del sistema.
+
+La richiesta può riferirsi a un tag già esistente, identificato tramite \texttt{existingTagLabel}, oppure
+proporre la creazione di un nuovo tag mediante \texttt{proposedLabel}. Le due modalità sono mutuamente esclusive:
+i nuovi tag vengono creati solo in seguito all’approvazione della richiesta, evitando la presenza di tag non
+associati ad alcun documento.
+
+La classe fornisce factory method dedicati per la creazione delle due tipologie di richiesta e mantiene
+direttamente nel Domain Model le principali invarianti di correttezza, verificate dal metodo
+\texttt{validateOrThrow()}.
+
 \subsection{ORM}
 Il package ORM rappresenta il livello di separazione tra i dati dell'applicazione e il suo dominio. Il suo compito è
 quello di tradurre le operazioni eseguite sugli oggetti del Domain Model in interrogazioni
@@ -610,12 +698,12 @@ connessioni multiple.
 La connessione viene inizializzata solo al primo utilizzo (lazy initialization) e resa
 disponibile ai DAO tramite un metodo statico.
 
-La classe implementa un attributo \texttt{enableTesting} che se \texttt{True} all'invocazione del metodo \texttt{getInstance()} restituisce la connessione ad un database parallelo a quello di produzione, adibito a testare le funzionalità del software. In questo modo priviamo il database di produzione di operazioni differenti rispetto al suo utilizzo verso l'utenza.
+La classe implementa un attributo \texttt{enableTesting} che, se \texttt{True} all'invocazione del metodo \texttt{getInstance()}, restituisce la connessione ad un database parallelo a quello di produzione, adibito a testare le funzionalità del software. In questo modo priviamo il database di produzione di operazioni differenti rispetto al suo utilizzo verso l'utenza.
 
 \subsubsection{BaseDAO}
 La classe \texttt{BaseDAO} rappresenta una superclasse astratta comune a tutti i DAO del
 progetto. Essa fornisce funzionalità condivise, come l’accesso alla connessione ottenuta
-tramite \texttt{DBConnection}, e definisce una base comune per la gestione delle operazioni. Contiene un attributo \texttt{Connection connection} il cui tipo è contenuto nella libreria \texttt{java.sql} e che viene restituito dal metodo \texttt{getConnection()} ereditato da tutte le classi che estendono \texttt{BaseDAO}.
+tramite \texttt{DBConnection}, e definisce una base comune per la gestione delle operazioni. Contiene l'attributo \texttt{Connection connection}, il cui tipo è contenuto nella libreria \texttt{java.sql} e che viene restituito dal metodo \texttt{getConnection()} ereditato da tutte le classi che estendono \texttt{BaseDAO}.
 
 \subsubsection{DocumentDAO}
 Il \texttt{DocumentDAO} è responsabile della persistenza degli oggetti \texttt{Document}.
@@ -668,12 +756,12 @@ informazioni associate a un profilo.
 
 Questo DAO è utilizzato sia durante le operazioni di autenticazione e registrazione, sia
 nelle funzionalità amministrative che richiedono la gestione degli utenti, come la
-promozione a moderatore o l’eventuale rimozione di un account. Quando l'utente manipola le proprie collezioni o i propri preferiti il flusso di esecuzione accede a questa classe, che richiama altre classi DAO quando necessario. 
+promozione a moderatore o l’eventuale rimozione di un account. Quando l'utente manipola le proprie collezioni o i propri preferiti il flusso di esecuzione accede a questa classe, che richiama altre classi DAO quando necessario.
 
 \subsubsection{PublishRequestDAO}
 La classe \texttt{PublishRequestDAO} si occupa della gestione delle richieste di pubblicazione
 rappresentate dalla classe \texttt{PublishRequest}. Esso fornisce metodi per la creazione
-di nuove richieste, il recupero delle richieste in attesa e l’aggiornamento dello stato a
+di nuove richieste di pubblicazione di un documento, il recupero delle richieste in attesa e l’aggiornamento dello stato a
 seguito della valutazione da parte di un moderatore.
 
 Grazie a questo DAO, il processo di pubblicazione dei documenti risulta separato dalla
@@ -698,15 +786,40 @@ Questo DAO garantisce che, per ogni coppia di documenti, possa esistere al massi
 relazione, in accordo con i vincoli definiti nel modello relazionale. La separazione di
 questa logica in un DAO dedicato consente di mantenere chiara e coerente la gestione dei
 collegamenti semantici tra i documenti.
-\subsubsection{TagDAO}
-TODO
+\subsubsection{{TagDAO}}
+La classe \texttt{TagDAO} realizza il livello di accesso ai dati per l’entità di dominio \texttt{Tag},
+incapsulando tutte le operazioni di persistenza e recupero dei tag dal database.
+
+In particolare, la classe fornisce:
+\begin{itemize}
+    \item un metodo di inserimento (\texttt{addTag}) per la creazione di nuovi tag persistenti;
+    \item un metodo di ricerca (\texttt{findByLabelNormalized}) che consente di recuperare un tag
+    a partire dalla sua etichetta, applicando una normalizzazione case-insensitive e whitespace-insensitive.
+\end{itemize}
+
 \subsubsection{TagChangeRequestDAO}
-TODO
+La classe \texttt{TagChangeRequestDAO} implementa l’accesso ai dati per l’entità di dominio
+\texttt{TagChangeRequest}, incapsulando le query SQL necessarie a creare, aggiornare e consultare
+le richieste di modifica dei tag.
+
+La creazione di nuove richieste è gestita tramite due metodi distinti, coerenti con le due varianti
+di \texttt{TagChangeRequest}: \texttt{addRequestForExistingTag} (operazioni \texttt{ADD} o \texttt{REMOVE} su tag
+già esistenti) e \texttt{addRequestForNewTag} (proposta di nuovo tag tramite \texttt{proposedLabel}).
+
+Il metodo \texttt{updateStatus} consente al moderatore di aggiornare lo stato della richiesta,
+impostando anche \texttt{date\_result} e salvando l’identificativo del moderatore che ha preso la decisione.
+
+La conversione tra record SQL e oggetto di dominio è centralizzata nel metodo \texttt{map}, che ricostruisce
+le associazioni con \texttt{Document} e, se presente, con \texttt{User} (moderatore).
+Infine, \texttt{existsPendingDuplicate} permette di verificare l’esistenza di una richiesta \texttt{PENDING} equivalente,
+prevenendo duplicati logici sullo stesso documento e operazione.
+
+
 \section{Testing}
 Per verificare la correttezza del codice e del flusso di esecuzione delle funzionalità, è ragionevole definire delle classi adibite al testing. Tramite la libreria \textbf{JUnit}, sono stati definiti tre livelli di test:
 \begin{itemize}
-    \item Testing per la \textbf{Business Logic}, dove si verificano i metodi di ogni controller considerando esiti positivi e negativi di ogni funzionalità. 
-    \item Testing del \textbf{Domain Model}, ristretto soltanto alla classe \texttt{DocumentSearchCriteriaBuilder} poiché l'unica ad implementare delle funzionalità a livello di dominio differenti da getter e setter.
+    \item Testing per la \textbf{Business Logic}, dove si verificano i metodi di ogni controller considerando esiti positivi e negativi di ogni funzionalità.
+    \item Testing del \textbf{Domain Model}, ristretto soltanto alla classe \texttt{DocumentSearchCriteri-\\aBuilder}, poiché unica ad implementare delle funzionalità a livello di dominio differenti da getter e setter.
     \item Testing per l'\textbf{ORM}, dove si interagisce con il database seguendo i metodi delle classi DAO e se ne verifica successivamente lo stato e le tuple aggiunte, rimosse o modificate.
 \end{itemize}
 
@@ -741,7 +854,7 @@ Nel Listing \ref{testbusinessadddocument} troviamo il codice che testa la creazi
 
 Mentre nel Listing \ref{testbusinessmanagereuqest} è presente il test per l'aggiornamento dello status di una \texttt{PublishRequest} da parte di un moderatore:
 
-\begin{lstlisting}[language=Java, caption=Codice del testing di addDocument() ,label=testbusinessmanagereuqest]
+\begin{lstlisting}[language=Java, caption=Codice che testa l'aggiornamento dello status del documento ,label=testbusinessmanagereuqest]
     @Test
     void updateDocumentStatus_positive_and_negative_and_auth() {
         // POSITIVO: crea doc + richiesta pendente, approva tramite moderatorController
@@ -784,6 +897,102 @@ Mentre nel Listing \ref{testbusinessmanagereuqest} è presente il test per l'agg
     }
 \end{lstlisting}
 
+Il seguente invece si riferisce alla richiesta di aggiunta di un tag in un documento, in questo caso i test sono due per coprire i casi in cui il tag è esistente o nuovo:
+
+\begin{lstlisting}[language=Java, caption=Codice del testing di requestAddNewTag() e requestAddExistingTag(),label=testbusinessaddtag]
+@Test
+    void requestAddExistingTag() {
+        // caso: crea richiesta valida per tag ESISTENTE
+        controller.createDocument("DocTagExist", "d", "1900", DocumentFormat.PDF, List.of("t"));
+        List<Document> docs = documentDAO.getDocumentsByAuthor(currentUser.getId());
+        assertFalse(docs.isEmpty());
+        int docId = docs.get(0).getId();
+
+        // creo un tag già presente in tabella tag
+        String label = "ESISTENTE-" + System.currentTimeMillis();
+        tagDAO.addTag(new Tag(label, "desc"));
+
+        // prima della chiamata nessuna richiesta
+        List<TagChangeRequest> before = tagChangeRequestDAO.getByAuthor(currentUser.getId());
+        assertTrue(before.isEmpty());
+
+        // chiamata valida
+        controller.requestAddExistingTag(docId, label);
+
+        // deve esistere UNA richiesta PENDING ADD per quel documento/tag
+        List<TagChangeRequest> after = tagChangeRequestDAO.getByAuthor(currentUser.getId());
+        assertEquals(1, after.size());
+        TagChangeRequest r = after.get(0);
+        assertEquals(docId, r.getDocument().getId());
+        assertEquals(TagChangeOperation.ADD, r.getOperation());
+        assertEquals(RequestStatus.PENDING, r.getStatus());
+        assertEquals(label, r.getExistingTagLabel());
+        assertNull(r.getProposedLabel());
+
+        // caso: richiesta DUPLICATA sullo stesso doc/tag -> non crea nuove righe
+        controller.requestAddExistingTag(docId, label);
+        List<TagChangeRequest> afterDup = tagChangeRequestDAO.getByAuthor(currentUser.getId());
+        long countSame = afterDup.stream()
+                .filter(x -> x.getDocument() != null
+                        && x.getDocument().getId() == docId
+                        && label.equals(x.getExistingTagLabel())
+                        && x.getOperation() == TagChangeOperation.ADD
+                        && x.getStatus() == RequestStatus.PENDING)
+                .count();
+        assertEquals(1, countSame, "La seconda chiamata non deve creare richieste duplicate");
+
+        // caso: documento inesistente -> nessuna richiesta aggiuntiva
+        controller.requestAddExistingTag(Integer.MAX_VALUE, label);
+        List<TagChangeRequest> afterInvalidDoc = tagChangeRequestDAO.getByAuthor(currentUser.getId());
+        long countAfterInvalidDoc = afterInvalidDoc.stream()
+                .filter(x -> x.getDocument() != null
+                        && x.getDocument().getId() == docId
+                        && label.equals(x.getExistingTagLabel())
+                        && x.getOperation() == TagChangeOperation.ADD
+                        && x.getStatus() == RequestStatus.PENDING)
+                .count();
+        assertEquals(1, countAfterInvalidDoc, "Chiamate con docId invalido non devono modificare il DB");
+    }
+
+    @Test
+    void requestAddNewTag() {
+        // Arrange
+        controller.createDocument(
+                "DocNewTag",
+                "desc",
+                "1900",
+                DocumentFormat.PDF,
+                List.of()
+        );
+
+        List<Document> docs = documentDAO.getDocumentsByAuthor(currentUser.getId());
+        assertEquals(1, docs.size());
+        Document doc = docs.get(0);
+
+        String proposedLabel = "NuovoTagSpeciale";
+
+        // Il tag NON deve esistere nel catalogo prima
+        assertNull(tagDAO.findByLabelNormalized(proposedLabel));
+
+        // Act
+        controller.requestAddNewTag(doc.getId(), proposedLabel);
+
+        // Assert
+        List<TagChangeRequest> reqs = tagChangeRequestDAO.getRequestsByDocument(doc.getId());
+        assertEquals(1, reqs.size());
+        TagChangeRequest r = reqs.get(0);
+
+        assertEquals(TagChangeOperation.ADD, r.getOperation());
+        assertEquals(RequestStatus.PENDING, r.getStatus());
+        assertEquals(doc.getId(), r.getDocument().getId());
+
+        assertNull(r.getExistingTagLabel());
+        assertEquals(proposedLabel, r.getProposedLabel());
+
+        // Il Tag vero non deve ancora esistere
+        assertNull(tagDAO.findByLabelNormalized(proposedLabel));
+    }
+\end{lstlisting}
 
  \begin{figure}[H]
      \centering
@@ -797,7 +1006,7 @@ Mentre nel Listing \ref{testbusinessmanagereuqest} è presente il test per l'agg
      \label{fig:placeholder}
      \caption{I test di UserController, ModeratorController e LoginController}
  \end{figure}
- 
+
 \subsection{Test Domain Model}
 Come già detto, nel package Domain Model la maggior parte delle classi contiene solo metodi getter e setter. Questo perché in questo layer si depositano solo le funzionalità di dominio, che dipende dalla natura del software e del contesto rappresentato da esso. In questo caso quindi solo \texttt{DocumentSearchCriteriaBuilder} incorpora funzionalità di dominio da dover testare:
 
@@ -882,6 +1091,23 @@ Nel Listing \ref{testorm11} è presente il codice di testing per la funzionalit�
     }
 \end{lstlisting}
 
+Nel seguente Listing invece viene mostrato a livello di operazione CRUD il test della rimozione di un commento:
+\begin{lstlisting}[language=Java, caption=Test Remove comment  ,label=testremovecomment]
+@Test
+    void removeComment() {
+        String uniqueText = "cmt-rem-" + System.currentTimeMillis();
+        commentDAO.addComment(uniqueText, testUser.getId(), testDocId);
+
+        List<Comment> comments = commentDAO.getCommentsByDocument(testDocId);
+        Comment added = comments.stream().filter(c -> uniqueText.equals(c.getText())).findFirst().orElse(null);
+        assertNotNull(added, "Commento aggiunto non trovato prima della rimozione");
+
+        commentDAO.removeComment(added.getId());
+
+        List<Comment> after = commentDAO.getCommentsByDocument(testDocId);
+        assertFalse(after.stream().anyMatch(c -> uniqueText.equals(c.getText())), "Commento non rimosso");
+    }
+\end{lstlisting}
 Nelle immagini successive vengono mostrati tutti i test ed esiti delle classi del package ORM:
 
 \begin{figure}[H]
@@ -903,3 +1129,4 @@ Nelle immagini successive vengono mostrati tutti i test ed esiti delle classi de
      \caption{I test di UserDAO e DocumentRelationDAO}
  \end{figure}
 \end{document}
+
