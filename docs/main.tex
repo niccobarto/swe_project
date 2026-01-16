@@ -7,7 +7,7 @@
 \usepackage{geometry}
 \usepackage{subcaption}
 \geometry{margin=2.5cm}
-
+\usepackage{hyperref}
 
 \usepackage{listings}
 \usepackage{xcolor}
@@ -94,6 +94,8 @@ Parlando invece dell'ambiente di sviluppo dell'applicazione, i software utilizza
     \item \textbf{PgAdmin}: piattaforma per lo sviluppo e amministrazione di database PostgreSQL;
     \item \textbf{Lunacy}: software di creazione di mockup;
 \end{itemize}
+
+Il codice sorgente è reperibile nella repository GitHub seguente: \url{https://github.com/niccobarto/swe_project}.
 \section{Progettazione del software}
 \subsection{Attori e casi d'uso}
 Il sistema prevede diverse tipologie di attori, ognuna delle quali dispone di funzionalità specifiche coerenti con il proprio ruolo nel dominio applicativo. I casi d’uso descrivono le interazioni tra gli attori e il sistema, specificando obiettivi, vincoli e dipendenze tra funzionalità.
@@ -122,7 +124,7 @@ Di seguito sono presentati i tre diagrammi dei casi d’uso, uno per ciascuna ca
 L’utente predefinito è un soggetto autenticato che può accedere alle funzionalità del sistema adibite alla consultazione dei documenti pubblicati e la ricerca filtrata. Può rilasciare commenti sotto uno specifico documento che sarà pubblico a tutti gli altri utenti del sistema, che siano con stesso livello di accesso o moderatori/admin. Può organizzare documenti in collezioni o spuntarli come preferiti.
 \subsubsection{Autore}
 L’Autore è un utente autenticato che può creare, modificare e gestire i propri documenti. Qualsiasi utente ha la possibilità di pubblicare documenti, pertanto Autore viene considerato un tipo specifico di Utente. È la figura centrale nella produzione di contenuti:
-può caricare nuovi documenti, etichettarli con tag, organizzarli in collezioni, e soprattutto inviare una richiesta di pubblicazione, che verrà valutata dai Moderatori. Definisce relazioni tra documenti di propria proprietà ed altrui, ovvero collegamenti significativi a cui viene associato un significato, come "una nuova versione" oppure "trascrizione", e che unite definiscono una rete che lega documenti ad altri. Gestisce le richieste di relazione che riguardano i propri documenti pubblicati.
+può caricare nuovi documenti, etichettarli con tag, organizzarli in collezioni, e soprattutto inviare una richiesta di pubblicazione, che verrà valutata dai Moderatori. Definisce relazioni tra documenti di propria proprietà ed altrui, ovvero collegamenti significativi a cui viene associato un significato, come "una nuova versione" oppure "trascrizione", e che unite definiscono una rete che lega documenti ad altri. Gestisce le richieste di relazione che riguardano i propri documenti pubblicati. 
 
 %TABELLA USE CASE 1
 \begin{table}[H]
@@ -143,7 +145,7 @@ L’utente è in grado di creare documenti di un certo formato caricandone il co
     \item Clicca il pulsante di creazione documento.
     \item Il sistema genera automaticamente i campi \texttt{file\_path} e \texttt{file\_name}, necessari al salvataggio.
     \item La creazione del documento avviene correttamente.
-\end{enumerate} \\
+\end{enumerate} \\ 
 \hline
 \textbf{Flusso alternativo} &
 \begin{itemize}
@@ -151,7 +153,7 @@ L’utente è in grado di creare documenti di un certo formato caricandone il co
 \end{itemize} \\
 \hline
 \textbf{Post-condizioni} &
-Ora l’utente possiede un documento associato al proprio profilo come autore.
+Ora l’utente possiede un documento associato al proprio profilo come autore.  
 Può richiedere la pubblicazione oppure modificarlo. \\
 \hline
 \end{tabular}
@@ -185,7 +187,7 @@ Utente (Autore), Moderatore \\
     associata al documento.
     \item La richiesta viene registrata con stato \texttt{PENDING}.
     \item Un moderatore visualizza la richiesta e ne valuta l’approvazione.
-\end{enumerate} \\
+\end{enumerate} \\ 
 \hline
 \textbf{Flusso alternativo} &
 \begin{itemize}
@@ -214,7 +216,7 @@ Utente (Autore), Moderatore \\
 \hline
 \textbf{Descrizione use case} &
 Un autore può definire una relazione tra due documenti pubblicati, scegliendo il tipo di relazione
-(e.g. \texttt{NEW\_VERSION\_OF}).
+(e.g. \texttt{NEW\_VERSION\_OF}).  
 La relazione diviene visibile a tutti solo dopo l'accettazione da parte dell’autore del documento di destinazione. \\
 \hline
 \textbf{Attori coinvolti} &
@@ -594,7 +596,7 @@ persistenza è dipendente dal package ORM.
 \subsubsection{Document}
 La classe \texttt{Document} rappresenta l’entità centrale del dominio applicativo.
 Un documento modella un contenuto musicale caricato da un autore ed è caratterizzato da
-attributi descrittivi quali il titolo, la descrizione, il formato del file, il periodo
+attributi descrittivi quali il titolo, la descrizione, il formato del file (\texttt{DocumentFormat}), il periodo
 storico di riferimento e la data di creazione. Ogni documento è associato a uno stato
 (\texttt{DocumentStatus}) che ne definisce il ciclo di vita, ad esempio bozza, in attesa di
 approvazione o pubblicato.
@@ -756,7 +758,7 @@ informazioni associate a un profilo.
 
 Questo DAO è utilizzato sia durante le operazioni di autenticazione e registrazione, sia
 nelle funzionalità amministrative che richiedono la gestione degli utenti, come la
-promozione a moderatore o l’eventuale rimozione di un account. Quando l'utente manipola le proprie collezioni o i propri preferiti il flusso di esecuzione accede a questa classe, che richiama altre classi DAO quando necessario.
+promozione a moderatore o l’eventuale rimozione di un account. Quando l'utente manipola le proprie collezioni o i propri preferiti il flusso di esecuzione accede a questa classe, che richiama altre classi DAO quando necessario. 
 
 \subsubsection{PublishRequestDAO}
 La classe \texttt{PublishRequestDAO} si occupa della gestione delle richieste di pubblicazione
@@ -818,7 +820,7 @@ prevenendo duplicati logici sullo stesso documento e operazione.
 \section{Testing}
 Per verificare la correttezza del codice e del flusso di esecuzione delle funzionalità, è ragionevole definire delle classi adibite al testing. Tramite la libreria \textbf{JUnit}, sono stati definiti tre livelli di test:
 \begin{itemize}
-    \item Testing per la \textbf{Business Logic}, dove si verificano i metodi di ogni controller considerando esiti positivi e negativi di ogni funzionalità.
+    \item Testing per la \textbf{Business Logic}, dove si verificano i metodi di ogni controller considerando esiti positivi e negativi di ogni funzionalità. 
     \item Testing del \textbf{Domain Model}, ristretto soltanto alla classe \texttt{DocumentSearchCriteri-\\aBuilder}, poiché unica ad implementare delle funzionalità a livello di dominio differenti da getter e setter.
     \item Testing per l'\textbf{ORM}, dove si interagisce con il database seguendo i metodi delle classi DAO e se ne verifica successivamente lo stato e le tuple aggiunte, rimosse o modificate.
 \end{itemize}
@@ -1006,7 +1008,7 @@ Il seguente invece si riferisce alla richiesta di aggiunta di un tag in un docum
      \label{fig:placeholder}
      \caption{I test di UserController, ModeratorController e LoginController}
  \end{figure}
-
+ 
 \subsection{Test Domain Model}
 Come già detto, nel package Domain Model la maggior parte delle classi contiene solo metodi getter e setter. Questo perché in questo layer si depositano solo le funzionalità di dominio, che dipende dalla natura del software e del contesto rappresentato da esso. In questo caso quindi solo \texttt{DocumentSearchCriteriaBuilder} incorpora funzionalità di dominio da dover testare:
 
