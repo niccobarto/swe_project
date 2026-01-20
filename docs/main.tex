@@ -59,7 +59,7 @@
         \textbf{Autori:} & \textbf{Corso:} \\
         Cristiano Acciai \& Niccolò Bartoli & Ingegneria del software \\[0.8cm]
 
-        \textbf{N° Matricola:} & \textbf{Docente corso:} \\
+        \textbf{N° Matricola:} & \textbf{Docente:} \\
         7076811 \& 7076612 & Enrico Vicario \end{tabular}
 \end{center}
 \newpage
@@ -68,7 +68,7 @@
 
 \section{Introduzione}
 \subsection{Descrizione del progetto}
-Questa relazione ha lo scopo di definire e spiegare i punti chiave relativi alla progettazione di un software Java ideato per la pubblicazione e manutenzione di documenti musicali. L'obiettivo principale è quello di garantire l'affidabilità e autenticità dei documenti per la corretta manutenibilità culturale. Questo tramite moderatori che hanno conoscenza riguardo l'arte con il ruolo di approvare i documenti pubblicati da un Autore; un documento si considera pubblico solo dopo tale conferma. Un utente autenticato potrà quindi visualizzare i documenti pubblici tramite una ricerca legata a vari parametri, aprire il documento, commentarlo o interagirci inserendolo in specifiche collezioni private. Il ruolo dell'admin è quello di un super-utente, che cioè amministra le funzionalità degli utenti e delle funzionalità associate. 
+Questa relazione ha lo scopo di definire e spiegare i punti chiave relativi alla progettazione di un software Java ideato per la pubblicazione e manutenzione di documenti musicali. L'obiettivo principale è quello di garantire l'affidabilità e autenticità dei documenti per la corretta manutenibilità culturale. Questo, tramite moderatori che hanno conoscenza riguardo l'arte, con il ruolo di approvare i documenti pubblicati da un Autore, il cui documento si considera pubblico solo dopo tale conferma. Un utente autenticato potrà quindi visualizzare i documenti pubblici tramite una ricerca legata a vari parametri, aprire il documento, commentarlo o interagirci inserendolo in specifiche collezioni private. 
 \subsection{Struttura del progetto e ambiente di sviluppo}
 Il progetto si compone in diversi package per permettere modularità e singola responsabilità. Ogni layer presenta un grado diverso di astrazione, riducendo le dipendenze e facilitando l’evoluzione del software.
 \begin{figure}[H]
@@ -80,11 +80,11 @@ Il progetto si compone in diversi package per permettere modularità e singola r
 I package che troviamo nell'architettura sono i seguenti:
 \begin{itemize}
     \item \textbf{Interfaccia}: definisce come l'utente interagisce con il software, permettendo di collegare la rappresentazione grafica alle funzionalità di dominio del software. Non è stata implementata, ma una sua versione semplificata può essere compresa visualizzando i mockup presenti nel prossimo paragrafo.
-    \item \textbf{Business Logic}: contiene la logica di business dell'architettura, definendo le funzionalità che ogni tipologia di utente può effettuare nel software. Il package dell'interfaccia invoca questi metodi in seguito ad un evento dell'utente.
-    \item \textbf{Domain Model}: le classi contenute in questo package definiscono le entità del software, come i documenti (\texttt{Document}), le richieste di pubblicazione (\texttt{PublishRequest}) o i commenti (\texttt{Comment}).
+    \item \textbf{Business Logic}: contiene la logica di business dell'architettura, definendo le funzionalità di cui ogni tipologia di utente può usufruire nel software. Il package dell'interfaccia invoca questi metodi in seguito ad un evento dell'utente.
+    \item \textbf{Domain Model}: le classi contenute in questo package definiscono le entità del software, come i documenti (\texttt{Document}), le richieste di pubblicazione (\texttt{PublishRequest}) o i commenti (\texttt{Comment}). All'interno vivono le funzionalità di dominio, ovvero quei processi non legati alla gestione del software ma intrinseci alla natura di ogni classe, esprimendo come i dati interagiscono tra loro.
     \item \textbf{ORM}: questo livello contiene le classi che gestiscono la persistenza degli oggetti del dominio, trasformandoli in record del database. Qui avviene la mappatura tra classi del Domain Model e tabelle, oltre alla definizione delle operazioni di CRUD tramite l'implementazione concreta delle classi DAO.
-    \item \textbf{JDBC}: fornisce l'accesso a basso livello al database tramite la definizioni di connessioni con esso. Tali connessioni sono fondamentali per le classi DAO definite nell'ORM permettendo di ottenere i risultati delle query.
-    \item \textbf{RDBMS}:rappresenta il sistema che conserva effettivamente i dati con tabelle che rappresentano il nostro dominio, vincoli e relazioni. Nel nostro caso troviamo PostgreSQL come DBMS relazionale scelto.
+    \item \textbf{JDBC}: fornisce l'accesso a basso livello al database tramite la definizioni di connessioni con esso. Tali connessioni sono fondamentali per le classi DAO, definite nell'ORM, permettendo di ottenere i risultati delle query.
+    \item \textbf{RDBMS}: rappresenta il sistema che conserva effettivamente i dati tramite tabelle che rappresentano il dominio, vincoli e relazioni. Nel nostro caso troviamo PostgreSQL come DBMS relazionale scelto.
 \end{itemize}
 
 Parlando invece dell'ambiente di sviluppo dell'applicazione, i software utilizzati sono:
@@ -104,24 +104,24 @@ Di seguito sono presentati i tre diagrammi dei casi d’uso, uno per ciascuna ca
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\linewidth]{images/usecase_user.png}
+\includegraphics[width=1\linewidth]{images/usecase_user.png}
 \caption{Casi d’uso dell’Utente / Autore}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\linewidth]{images/usecase_moderator.png}
+\includegraphics[width=1\linewidth]{images/usecase_moderator.png}
 \caption{Casi d’uso dell’attore Moderatore}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\linewidth]{images/usecase_admin.png}
+\includegraphics[width=1\linewidth]{images/usecase_admin.png}
 \caption{Casi d’uso dell’attore Admin}
 \end{figure}
 
 \subsubsection{Utente predefinito}
-L’utente predefinito è un soggetto autenticato che può accedere alle funzionalità del sistema adibite alla consultazione dei documenti pubblicati e la ricerca filtrata. Può rilasciare commenti sotto uno specifico documento che sarà pubblico a tutti gli altri utenti del sistema, che siano con stesso livello di accesso o moderatori/admin. Può organizzare documenti in collezioni o spuntarli come preferiti.
+L’Utente predefinito è un soggetto autenticato che può accedere alle funzionalità del sistema adibite alla consultazione dei documenti pubblicati e la ricerca filtrata. Può rilasciare commenti sotto uno specifico documento che sarà pubblico a tutti gli altri utenti del sistema, che siano con stesso livello di accesso o moderatori/admin. Può organizzare documenti in collezioni o spuntarli come preferiti.
 \subsubsection{Autore}
 L’Autore è un utente autenticato che può creare, modificare e gestire i propri documenti. Qualsiasi utente ha la possibilità di pubblicare documenti, pertanto Autore viene considerato un tipo specifico di Utente. È la figura centrale nella produzione di contenuti:
 può caricare nuovi documenti, etichettarli con tag, organizzarli in collezioni, e soprattutto inviare una richiesta di pubblicazione, che verrà valutata dai Moderatori. Definisce relazioni tra documenti di propria proprietà ed altrui, ovvero collegamenti significativi a cui viene associato un significato, come "una nuova versione" oppure "trascrizione", e che unite definiscono una rete che lega documenti ad altri. Gestisce le richieste di relazione che riguardano i propri documenti pubblicati. 
@@ -250,7 +250,7 @@ e favorisce la navigazione tra documenti connessi da affinità di contenuto, ver
 
 \subsubsection{Moderatore}
 Il Moderatore ha il compito di garantire la qualità dei documenti pubblicati. Può visualizzare le richieste di pubblicazione in attesa, analizzare il contenuto del documento e approvarne o rifiutarne la pubblicazione.
-È inoltre in grado di consultare lo storico delle richieste già valutate, garantendo tracciabilità delle decisioni.
+È inoltre in grado di consultare lo storico delle richieste già valutate, garantendo tracciabilità delle decisioni. La sua gestione si estende all'assegnazione di un Tag ad un documento, garantendo che gli Autori non associno label non conformi al tipo di documento o al suo contenuto.
 
 %TABELLA USE CASE 4
 \begin{table}[H]
@@ -429,7 +429,7 @@ Le classi sono organizzate nei tre package principali:
         \includegraphics[width=1\linewidth]{images/businesslogic.png}
         \caption{Business Logic}
     \end{figure}
-    \item \textbf{ORM (Object Relation Mapping)}: raccoglie le classi DAO (\texttt{UserDAO}, \texttt{DocumentDAO}, \texttt{PublishRequestDAO}, \texttt{CommentDAO}, \texttt{CollectionDAO}, \texttt{DocumentsRelationDAO}) e le componenti di accesso al database (\texttt{BaseDAO}, \texttt{DBConnection}), incaricate di tradurre le operazioni sul modello a oggetti in query verso il database relazionale.
+    \item \textbf{ORM (Object Relation Mapping)}: raccoglie le classi DAO (\texttt{UserDAO}, \texttt{DocumentDAO}, \texttt{PublishRequestDAO}, \texttt{CommentDAO}, \texttt{CollectionDAO}, \texttt{DocumentsRelationDAO},\texttt{TagDAO},\texttt{T-\\agChangeRequestDAO}) e le componenti di accesso al database (\texttt{BaseDAO}, \texttt{DBConnection}), incaricate di tradurre le operazioni sul modello a oggetti in query verso il database relazionale.
      \begin{figure}[H]
         \centering
         \includegraphics[width=1\linewidth]{images/orm.png}
@@ -538,6 +538,9 @@ gestisce gli oggetti \texttt{Document}, \texttt{PublishRequestDAO} le entità \t
 \texttt{CommentDAO} i commenti. Tutte queste classi sono raccolte nel package
 \texttt{ORM}, che funge da strato di accesso ai dati dell’architettura.
 \subsection{Diagramma ER e Modello Relazionale}
+Il diagramma ER (Entità-Relazione) definisce la rappresentazione concettuale dei dati, costruendo entità, con i relativi attributi, e relazioni che associano due entità seguendo un significato semantico. In generale, la definizione di un modello concettuale permette di concentrarsi inizialmente sulla rappresentazione dei dati provenienti da un contesto reale, senza doverli strutturare in un DB.
+
+Il passaggio al Modello Relazionale determina la fase di traduzione dello schema concettuale, dove le entità diventano relazioni effettive (tabelle), mentre gli attributi costituiscono le colonne di tali tabelle. Le relazioni del Modello ER indicano dei vincoli tra le tabelle del Modello Relazionale, permettendo di identificare vincoli di integrità referenziale. Talvolta, i legami tra due entità del modello concettuale sono abbastanza complessi da dover definire una relazione per rappresentarla nel Modello Relazionale (è di esempio la relazione \texttt{Comment}).
     \begin{figure}[H]
         \centering
         \includegraphics[width=1\linewidth]{images/diagrammaER.png}
@@ -566,7 +569,7 @@ l’autenticazione, il flusso applicativo viene demandato allo \texttt{UserContr
 \subsubsection{UserController}
 Lo \texttt{UserController} espone le funzionalità di base accessibili a qualsiasi utente
 autenticato. Tra queste rientrano operazioni come \texttt{createDocument},
-\texttt{searchDocuments} e \texttt{writeComment}. Attraverso questo controller l’utente può
+\texttt{searchDocuments} e \texttt{writeCom-\\ment}. Attraverso questo controller l’utente può
 creare e gestire collezioni personali, aggiungere documenti alle collezioni, scrivere commenti
 sui documenti pubblici e ricercare documenti tramite filtri. Inoltre, qualora l’utente assuma
 anche il ruolo di autore, lo \texttt{UserController} consente di accedere alle funzionalità di
